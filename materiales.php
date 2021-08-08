@@ -161,10 +161,10 @@ if ($nombrematerial != null) {
             </li>
 
             <!-- Nav Item - Tables -->
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Configuración</span></a>
+            <li class="nav-item ">
+                <a class="nav-link" href="contactos.php">
+                    <i class="fas fa-fw fa-user-friends"></i>
+                    <span>Buscar contactos</span></a>
             </li>
 
 
@@ -202,6 +202,77 @@ if ($nombrematerial != null) {
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
+                        <?php
+                        $cantidadsolicitudes = 0;
+                        $idusuario1 = [];
+                        $nombresolicitante = [];
+                        $consultaavance = $conexion->query("SELECT * from solicitudamistad where idusuario2=" . $idusuario);
+                        while ($consultausuario = mysqli_fetch_array($consultaavance)) {
+                            $idusuario1[] = $consultausuario["idusuario1"];
+                            $idusuario2[] = $consultausuario["idusuario2"];
+                            $idsolicitudamistad[] = $consultausuario["idsolicitudamistad"];
+                            $consultaavance2 = $conexion->query("SELECT * from usuario US where 
+    US.idusuario=" . $consultausuario["idusuario1"]);
+                            while ($consultausuarios = mysqli_fetch_array($consultaavance2)) {
+                                $nombresolicitante[] = $consultausuarios["nombreusuario"] . " " . $consultausuarios["apellidos"];
+                                $imagensolicitante[] = $consultausuarios["fotoperfil"];
+                            }
+                        }
+
+                        if ($idusuario1) {
+                            $cantidadsolicitudes = sizeof($idusuario1);
+                        }
+
+                        ?>
+                        <li class="nav-item dropdown no-arrow mx-1">
+                            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-user-plus fa-fw"></i>
+                                <!-- Counter - Messages -->
+                                <span class="badge badge-danger badge-counter"><?php echo $cantidadsolicitudes ?></span>
+                            </a>
+                            <!-- Dropdown - Messages -->
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="messagesDropdown">
+                                <h6 class="dropdown-header">
+                                    Solicitudes de amistad
+                                </h6>
+                                <?php for ($i = 0; $i < $cantidadsolicitudes; $i++) { ?>
+                                    <div class="dropdown-item d-flex align-items-center">
+                                        <div class="dropdown-list-image mr-3">
+                                            <img class="rounded-circle" src="<?php echo $imagensolicitante[$i]; ?>" alt="...">
+                                            <div class="status-indicator bg-success"></div>
+                                        </div>
+                                        <div class="font-weight-bold">
+                                            <div class="text-truncate"><?php echo $nombresolicitante[$i]; ?></div>
+                                        </div>
+                                        <div class="d-flex ml-2">
+                                            <form action="materiales.php?idproyecto=<?php print_r($idproyecto) ?>" method="post" enctype="multipart/form-data">
+                                                <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm" type="submit" name="aceptarsolicitud" value="Aceptar">
+
+                                                <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm" type="submit" name="rechazarsolicitud" value="Eliminar">
+
+                                                <input type="hidden" name="idsolicitud" value="<?php echo $idsolicitudamistad[$i] ?>">
+                                                <input type="hidden" name="idsolicitante" value="<?php echo $idusuario1[$i] ?>">
+
+                                            </form>
+                                        </div>
+
+                                    </div>
+                                <?php }
+                                if (isset($_POST['aceptarsolicitud'])) {
+                                    $solicitudid = $_POST['idsolicitud'];
+                                    $idusuariosol = $_POST['idsolicitante'];
+                                    $consultausuario = $conexion->query("INSERT INTO amistad VALUES (null," . $idusuariosol . ",$idusuario)");
+                                    $consultausuario = $conexion->query("DELETE FROM solicitudamistad WHERE idsolicitudamistad=" . $solicitudid);
+                                ?>
+                                    <script>
+                                        window.location.replace("materiales.php?idproyecto=<?php echo $idproyecto ?>");
+                                    </script>
+                                <?php
+                                }
+                                ?>
+
+                            </div>
+                        </li>
                         <!-- Nav Item - Search Dropdown (Visible Only XS) -->
                         <li class="nav-item dropdown no-arrow d-sm-none">
                             <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -266,13 +337,14 @@ if ($nombrematerial != null) {
                         <h1 class="h3 mb-0 text-gray-800">Materiales</h1>
                         <a href="#" data-bs-toggle="modal" data-bs-target="#infoavances2" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                             <i class="fas fa-download fa-sm text-white-50"></i> Crear material</a>
+
                     </div>
                     <div class="modal fade" style="margin-top:140px" id="infoavances2" tabindex="-1" role="dialog" aria-labelledby="tituloavance" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class=modal-header>
                                     <h5 id="tituloavance">Registrar material</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <button type="button" class="fa fa-times" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div>
@@ -343,29 +415,30 @@ if ($nombrematerial != null) {
                                             <?php for ($i = 0; $i < $cantidadmateriales; $i++) { ?>
                                                 <tr>
                                                     <form action="materiales.php?idproyecto=<?php print_r($idproyecto) ?>" method="POST">
-                                                    <input type="hidden" name="idavance" value="<?php echo $idmaterial[$i] ?> ">
+                                                        <input type="hidden" name="idavance" value="<?php echo $idmaterial[$i] ?> ">
                                                         <td><?php echo $nombrematerial[$i] ?></td>
                                                         <td><?php echo $stockmaterial[$i] ?></td>
                                                         <td><a href="<?php print_r($rutaarchivo[$i]) ?>" download="<?php echo $nombrearchivo[$i] ?>" class="btn btn-success mt-2">
                                                                 <i class="fas fa-edit"></i></a>
-                                                            <input name="eliminar" class="btn btn-danger mt-2" onclick="eliminar()" type="submit" value="Eliminar">
+                                                            <input class="btn btn-danger mt-2" onclick="eliminar(<?php echo $idmaterial[$i] ?>,<?php echo $idproyecto ?>)" type="button" value="Eliminar">
                                                         </td>
                                                     </form>
                                                 </tr>
 
-                                            <?php }
-                                            if (isset($_POST['eliminar'])) {
-                                                $idproyectoeliminar = $_POST['idavance'];
-                                                $consultausuario = $conexion->query("DELETE FROM poseerecurso WHERE idrecursomat=" . $idproyectoeliminar);
-                                                $consultausuario = $conexion->query("DELETE FROM recursosmat WHERE idrecursomat=" . $idproyectoeliminar);
 
+                                            <?php }
                                             ?>
-                                                <script>
-                                                    window.location.replace("materiales.php?idproyecto=<?php echo $idproyecto ?>");
-                                                </script>
-                                            <?php
-                                            }
-                                            ?>
+
+                                            <script type="text/javascript">
+                                                function eliminar(idreporte, idproyecto) {
+                                                    if (confirm("¿Estás seguro de eliminar este material?")) {
+                                                        window.location.replace("eliminarmaterial.php?idmaterial=" + idreporte + "&idproyecto=" + idproyecto);
+                                                    } else {
+                                                        return
+                                                    };
+                                                }
+                                            </script>
+
                                         </tbody>
                                     </table>
                                 </div>

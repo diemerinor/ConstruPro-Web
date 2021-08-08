@@ -11,6 +11,7 @@ $cantidadmateriales = 0;
 $errores = '';
 $cantidadavances = 0;
 $enviado = '';
+$vartest = 0;
 
 if (!isset($_SESSION['loggeado'])) {
     $inicio = "no";
@@ -28,6 +29,26 @@ $consultaavance = $conexion->query("SELECT * from proyecto where idproyecto=" . 
 while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $nombreproyecto = $consultausuario["nombreproyecto"];
 }
+$cantidadsolicitudes = 0;
+$idusuario1 = [];
+$nombresolicitante = [];
+$consultaavance = $conexion->query("SELECT * from solicitudamistad where idusuario2=" . $idusuario);
+while ($consultausuario = mysqli_fetch_array($consultaavance)) {
+    $idusuario1[] = $consultausuario["idusuario1"];
+    $idusuario2[] = $consultausuario["idusuario2"];
+    $idsolicitudamistad[] = $consultausuario["idsolicitudamistad"];
+    $consultaavance2 = $conexion->query("SELECT * from usuario US where 
+    US.idusuario=" . $consultausuario["idusuario1"]);
+    while ($consultausuarios = mysqli_fetch_array($consultaavance2)) {
+        $nombresolicitante[] = $consultausuarios["nombreusuario"] . " " . $consultausuarios["apellidos"];
+        $imagensolicitante[] = $consultausuarios["fotoperfil"];
+    }
+}
+
+if ($idusuario1) {
+    $cantidadsolicitudes = sizeof($idusuario1);
+}
+
 
 
 //CONSULTA USUARIO
@@ -227,10 +248,10 @@ for ($i = 0; $i < $cantidadavances; $i++) {
             </li>
 
             <!-- Nav Item - Tables -->
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Configuración</span></a>
+            <li class="nav-item ">
+                <a class="nav-link" href="contactos.php">
+                    <i class="fas fa-fw fa-user-friends"></i>
+                    <span>Buscar contactos</span></a>
             </li>
 
             <!-- Divider -->
@@ -268,6 +289,55 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
 
+                        <li class="nav-item dropdown no-arrow mx-1">
+                            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-user-plus fa-fw"></i>
+                                <!-- Counter - Messages -->
+                                <span class="badge badge-danger badge-counter"><?php echo $cantidadsolicitudes?></span>
+                            </a>
+                            <!-- Dropdown - Messages -->
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="messagesDropdown">
+                                <h6 class="dropdown-header">
+                                    Solicitudes de amistad
+                                </h6>
+                                <?php for ($i = 0; $i < $cantidadsolicitudes; $i++) { ?>
+                                    <div class="dropdown-item d-flex align-items-center">
+                                        <div class="dropdown-list-image mr-3">
+                                            <img class="rounded-circle" src="<?php echo $imagensolicitante[$i]; ?>" alt="...">
+                                            <div class="status-indicator bg-success"></div>
+                                        </div>
+                                        <div class="font-weight-bold">
+                                            <div class="text-truncate"><?php echo $nombresolicitante[$i]; ?></div>
+                                        </div>
+                                        <div class="d-flex ml-2">
+                                            <form action="charts.php?idproyecto=<?php print_r($idproyecto) ?>" method="post" enctype="multipart/form-data">
+                                                <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm" type="submit" name="aceptarsolicitud" value="Aceptar">
+
+                                                <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm" type="submit" name="rechazarsolicitud" value="Eliminar">
+
+                                                <input type="hidden" name="idsolicitud" value="<?php echo $idsolicitudamistad[$i] ?>">
+                                                <input type="hidden" name="idsolicitante" value="<?php echo $idusuario1[$i] ?>">
+
+                                            </form>
+                                        </div>
+
+                                    </div>
+                                <?php }
+                                if (isset($_POST['aceptarsolicitud'])) {
+                                    $solicitudid = $_POST['idsolicitud'];
+                                    $idusuariosol = $_POST['idsolicitante'];
+                                    $consultausuario = $conexion->query("INSERT INTO amistad VALUES (null," . $idusuariosol . ",$idusuario)");
+                                    $consultausuario = $conexion->query("DELETE FROM solicitudamistad WHERE idsolicitudamistad=" . $solicitudid);
+                                ?>
+                                    <script>
+                                        window.location.replace("charts.php?idproyecto=<?php echo $idproyecto ?>");
+                                    </script>
+                                <?php
+                                }
+                                ?>
+
+                            </div>
+                        </li>
 
                         <!-- Nav Item - Search Dropdown (Visible Only XS) -->
                         <li class="nav-item dropdown no-arrow d-sm-none">
@@ -426,6 +496,9 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                                     <hr>
                                 </div>
                             </div>
+                            <script>
+                                var valorreporte = 0;
+                            </script>
 
                             <!-- Bar Chart -->
                             <div class="card shadow mb-4">
@@ -454,28 +527,98 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                                                             <td><?php echo $descripcionavance[$i] ?></td>
                                                             <td><?php echo $metrosavanzados[$i] . ' ' . $nombreunidad[$i] ?></td>
                                                             <td><?php echo $fechacompleta[$i] ?></td>
-                                                            <?php if ($rol == 1) { ?><td><a href="<?php print_r($rutaarchivo[$i]) ?>" download="<?php echo $nombrearchivo[$i] ?>" class="btn btn-success mt-2">
+                                                            <?php if ($rol == 1) { ?><td>
+                                                                    <a href="editaravance.php?idreporte=<?php echo $idreporte[$i] ?>&idproyecto=<?php echo $idproyecto ?>" class="btn btn-success mt-2" data-id=" <? echo $idreporte[$i] ?>">
                                                                         <i class="fas fa-edit"></i></a>
-
-                                                                    <input name="eliminar" class="btn btn-danger mt-2" onclick="eliminar()" type="submit" value="Eliminar">
-
+                                                                    <input class="btn btn-danger mt-2" onclick="eliminar(<?php echo $idreporte[$i] ?>,<?php echo $idproyecto ?>)" type="button" value="Eliminar">
+                                                                    <form name="form_eliminar" id="form_eliminar" method="post" href="eliminaravance.php>">
+                                                                        <input type="hidden" name="idavance" value="<?php echo $idreporte[$i] ?> ">
+                                                                        <br>
+                                                                        <br>
+                                                                    </form>
                                                                 </td> <?php } ?>
                                                         </form>
+
+
                                                     </tr>
                                                 <?php } ?>
 
-                                                <?php
-                                                if (isset($_POST['eliminar'])) {
-                                                    $idproyectoeliminar = $_POST['idavance'];
-                                                    $consultausuario = $conexion->query("DELETE FROM reporteavance WHERE idreporteavance=".$idproyectoeliminar);
-                                                ?> 
                                                 <script>
-                                                window.location.replace("charts.php?idproyecto=<?php echo $idproyecto ?>");
-                                            </script>
-                                                <?php
-                                                
-                                                }
-                                                ?>
+                                                    function editar(idreporte, idproyecto) {
+                                                        valorreporte = 5;
+
+                                                        <?php
+                                                        $vartest = "<script> document.writeln(valorreporte); </script>";
+                                                        ?>
+                                                        document.getElementById("avanceeditar").value = idreporte;
+
+                                                    }
+                                                </script>
+
+
+
+                                                <script>
+
+                                                </script>
+
+
+                                                <div class="modal fade" id="myModal" role="dialog">
+                                                    <div class="modal-dialog modal-lg">
+                                                        <!-- Modal content-->
+
+                                                        <div class="modal-content">
+
+                                                            <script>
+                                                                console.log(valorreporte);
+                                                            </script>
+                                                            <?php
+                                                            $valor = $_POST["avanceeditar"];
+                                                            echo $valor;
+                                                            $var_PHP = "<script> document.writeln(valorreporte); </script>"; // igualar el valor de la variable JavaScript a PHP 
+                                                            // echo $valor;
+                                                            // $sql = "SELECT * FROM reporteavance where";
+                                                            // $resultados = $conexion->query($sql);
+                                                            // echo 'Unidad de medida(*): <select style="margin-bottom:10px" name="idunidad" id="idunidad" class="form-control">';
+                                                            // echo '<option>Seleccione unidad... </option>';
+                                                            // while ($row = mysqli_fetch_array($resultados)) {
+                                                            //     if ($tipop == $row["nombreunidad"]) {
+                                                            //         echo '<option selected="true" value="' . $row["idunidaddemedida"] . '">' . $row["nombreunidad"] . '</option>';
+                                                            //     } else {
+                                                            //         echo '<option value="' . $row["idunidaddemedida"] . '">' . $row["nombreunidad"] . '</option>';
+                                                            //     }
+                                                            // }
+                                                            // echo '</select>';
+                                                            ?>
+
+                                                            <div class="modal-header">
+                                                                <h4 class="modal-title">Editar avance</h4>
+                                                                <button type="button" class="close" data-dismiss="modal">×</button>
+                                                                <h4>
+                                                                </h4>
+
+
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div id="contact_form">
+                                                                    <div class="col-md-6">
+                                                                        <p>Datos del Doctor.</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <script type="text/javascript">
+                                                    function eliminar(idreporte, idproyecto) {
+                                                        if (confirm("¿Estás seguro de eliminar este avance?")) {
+                                                            window.location.replace("eliminaravance.php?idavance=" + idreporte + "&idproyecto=" + idproyecto);
+                                                        } else {
+                                                            return
+                                                        };
+                                                    }
+                                                </script>
+
                                             </tbody>
                                         </table>
                                     </div>
@@ -488,9 +631,104 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                         <div class="col-xl-4 col-lg-5">
                             <div class="card shadow mb-4">
                                 <!-- Card Header - Dropdown -->
-                                <div class="card-header py-3">
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Secciones del proyecto</h6>
+                                    <div class="dropdown no-arrow">
+                                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
+                                            <div class="dropdown-header">Dropdown Header:</div>
+
+                                            <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#infoavances3" href="#">Crear sección</a>
+
+                                        </div>
+                                    </div>
                                 </div>
+                                <div class="modal fade" style="margin-top:140px" id="infoavances3" tabindex="-1" role="dialog" aria-labelledby="tituloavance" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class=modal-header>
+                                                <h5 id="tituloavance">Crear sección</h5>
+                                                <button type="button" class="fa fa-times" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div>
+                                                    <form action="charts.php?idproyecto=<?php print_r($idproyecto) ?>" method="post" enctype="multipart/form-data">
+                                                        <div class="form-group">
+                                                            <label for="exampleFormControlInput1">Nombre seccion (*)</label>
+                                                            <input type="text" name="nombreevento" class="form-control" id="exampleFormControlInput1">
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <label for="exampleFormControlTextarea1">Ingrese descripción (*):</label>
+                                                            <textarea id="descripcion2" name="descripcion2" style="height:100px; resize:none;" class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <label for="exampleFormControlInput1">Cantidad(*)</label>
+                                                            <input type="text" name="cantidadd" maxlength="7" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: 10000">
+                                                        </div>
+
+                                                        <?php
+
+                                                        $sql = "SELECT * FROM unidaddemedida";
+                                                        $resultados = $conexion->query($sql);
+                                                        echo 'Unidad de medida(*): <select style="margin-bottom:10px" name="idunidad" id="idunidad" class="form-control">';
+                                                        echo '<option>Seleccione unidad... </option>';
+                                                        while ($row = mysqli_fetch_array($resultados)) {
+                                                            if ($tipop == $row["nombreunidad"]) {
+                                                                echo '<option selected="true" value="' . $row["idunidaddemedida"] . '">' . $row["nombreunidad"] . '</option>';
+                                                            } else {
+                                                                echo '<option value="' . $row["idunidaddemedida"] . '">' . $row["nombreunidad"] . '</option>';
+                                                            }
+                                                        }
+                                                        echo '</select>';
+                                                        ?>
+
+
+                                                        <div class="form-group">
+                                                            <label for="exampleFormControlInput1">Valor(*)</label>
+                                                            <input type="text" name="valor" maxlength="7" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: 10000">
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <input style="margin-top:30px; color:white;" class="btn-primary" type="submit" name="ingresarseccion" value="Ingresar">
+                                                        </div>
+
+                                                    </form>
+                                                    <?php
+                                                    if (isset($_POST['ingresarseccion'])) {
+                                                        $nombreseccion = $_POST['nombreevento'];
+                                                        $descr = $_POST['descripcion2'];
+                                                        $descr = trim($descr); //la funcion trim borra los espacios de al principio y al final
+                                                        $descr = htmlspecialchars($descr);
+                                                        $descr = stripslashes($descr);
+                                                        $cantidad = $_POST['cantidadd'];
+                                                        $unidadmedida = $_POST['idunidad'];
+                                                        $valor = $_POST['valor'];
+
+
+                                                        $consultausuario = $conexion->query("INSERT INTO secciones VALUES (null," . $idproyecto . ",'" . $nombreseccion . "','" . $descr . "'," . $cantidad . ",0," . $unidadmedida . "," . $valor . ")");
+
+
+                                                    ?>
+                                                        <script>
+                                                            console.log("hola");
+                                                            window.location.replace("charts.php?idproyecto=<?php echo $idproyecto ?>");
+                                                        </script>
+                                                    <?php
+                                                        if (!$errores) {
+                                                            $enviado = 'true';
+                                                        }
+                                                    }
+                                                    ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Card Body -->
                                 <div class="card-body">
                                     <?php for ($i = 0; $i < $cantidadsecciones; $i++) { ?>
@@ -528,12 +766,7 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                 </div>
             </footer>
 
-            <script type="text/javascript">
-                function eliminar() {
-                    if (confirm("Esta seguro")) form_eliminar.submit();
-                    else return;
-                }
-            </script>
+
             <!-- End of Footer -->
 
         </div>

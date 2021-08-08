@@ -35,8 +35,8 @@ while ($consultausuario = mysqli_fetch_array($consultaavance)) {
 }
 $consultaavance = $conexion->query("SELECT * from usuario us, proyecto pr, participa pa where
     pa.idproyecto= pr.idproyecto and pa.idusuario = us.idusuario and
-    pr.idproyecto =".$idproyecto." and
-    us.idusuario=".$idusuario);
+    pr.idproyecto =" . $idproyecto . " and
+    us.idusuario=" . $idusuario);
 while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $idproyecto2 = $consultausuario["idproyecto"];
 }
@@ -62,7 +62,7 @@ while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $metrosavanzados[] = $consultausuario["metrosavanzados"];
     $fechareporte[] = $consultausuario["fechareportado"];
 }
-if($nombreunidad != null){
+if ($nombreunidad != null) {
     $cantidadavances = sizeof($nombreunidad);
 }
 if ($cantidadavances > 0) {
@@ -75,7 +75,7 @@ if ($cantidadavances > 0) {
         $nombreseccion[] = $consultausuario["nombreseccion"];
     }
     $cantidadsecciones = sizeof($nombreseccion);
-}else{
+} else {
     $cantidadsecciones = 0;
 }
 
@@ -90,7 +90,7 @@ while ($consultausuario = mysqli_fetch_array($consultaeventos)) {
     $fechaevento[] = $consultausuario["fechaevento2"];
     $horaevento[] = $consultausuario["hora"];
 }
-if($tituloevento !=null)$cantidadeventos = sizeof($tituloevento);
+if ($tituloevento != null) $cantidadeventos = sizeof($tituloevento);
 ?>
 <script type="text/javascript">
     let ultimoval = [];
@@ -125,7 +125,10 @@ $consultaingreso = $conexion->query("SELECT SUM(ingreso) as ingresos FROM
 while ($consultausuario = mysqli_fetch_array($consultaingreso)) {
     $ingreso = $consultausuario['ingresos'];
 }
-$gasto ;
+if ($ingreso == null) {
+    $ingreso = "0";
+}
+$gasto;
 $consultagasto = $conexion->query("SELECT SUM(ingreso) as gastos FROM
             proyecto pr, notificaciones no where
             no.idproyecto = pr.idproyecto and
@@ -134,7 +137,7 @@ $consultagasto = $conexion->query("SELECT SUM(ingreso) as gastos FROM
 while ($consultausuario = mysqli_fetch_array($consultagasto)) {
     $gasto = $consultausuario['gastos'];
 }
-if($gasto == null){
+if ($gasto == null) {
     $gasto = "0";
 }
 
@@ -234,7 +237,7 @@ if($gasto == null){
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-            
+
 
             <!-- Nav Item - Charts -->
             <li class="nav-item">
@@ -244,10 +247,10 @@ if($gasto == null){
             </li>
 
             <!-- Nav Item - Tables -->
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Configuración</span></a>
+            <li class="nav-item ">
+                <a class="nav-link" href="contactos.php">
+                    <i class="fas fa-fw fa-user-friends"></i>
+                    <span>Buscar contactos</span></a>
             </li>
 
             <!-- Divider -->
@@ -288,7 +291,77 @@ if($gasto == null){
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
 
+                    <?php
+                        $cantidadsolicitudes = 0;
+                        $idusuario1 = [];
+                        $nombresolicitante = [];
+                        $consultaavance = $conexion->query("SELECT * from solicitudamistad where idusuario2=" . $idusuario);
+                        while ($consultausuario = mysqli_fetch_array($consultaavance)) {
+                            $idusuario1[] = $consultausuario["idusuario1"];
+                            $idusuario2[] = $consultausuario["idusuario2"];
+                            $idsolicitudamistad[] = $consultausuario["idsolicitudamistad"];
+                            $consultaavance2 = $conexion->query("SELECT * from usuario US where 
+    US.idusuario=" . $consultausuario["idusuario1"]);
+                            while ($consultausuarios = mysqli_fetch_array($consultaavance2)) {
+                                $nombresolicitante[] = $consultausuarios["nombreusuario"] . " " . $consultausuarios["apellidos"];
+                                $imagensolicitante[] = $consultausuarios["fotoperfil"];
+                            }
+                        }
 
+                        if ($idusuario1) {
+                            $cantidadsolicitudes = sizeof($idusuario1);
+                        }
+
+                        ?>
+                        <li class="nav-item dropdown no-arrow mx-1">
+                            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-user-plus fa-fw"></i>
+                                <!-- Counter - Messages -->
+                                <span class="badge badge-danger badge-counter"><?php echo $cantidadsolicitudes ?></span>
+                            </a>
+                            <!-- Dropdown - Messages -->
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="messagesDropdown">
+                                <h6 class="dropdown-header">
+                                    Solicitudes de amistad
+                                </h6>
+                                <?php for ($i = 0; $i < $cantidadsolicitudes; $i++) { ?>
+                                    <div class="dropdown-item d-flex align-items-center">
+                                        <div class="dropdown-list-image mr-3">
+                                            <img class="rounded-circle" src="<?php echo $imagensolicitante[$i]; ?>" alt="...">
+                                            <div class="status-indicator bg-success"></div>
+                                        </div>
+                                        <div class="font-weight-bold">
+                                            <div class="text-truncate"><?php echo $nombresolicitante[$i]; ?></div>
+                                        </div>
+                                        <div class="d-flex ml-2">
+                                            <form action="detalleproy.php?idproyecto=<?php print_r($idproyecto) ?>" method="post" enctype="multipart/form-data">
+                                                <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm" type="submit" name="aceptarsolicitud" value="Aceptar">
+
+                                                <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm" type="submit" name="rechazarsolicitud" value="Eliminar">
+
+                                                <input type="hidden" name="idsolicitud" value="<?php echo $idsolicitudamistad[$i] ?>">
+                                                <input type="hidden" name="idsolicitante" value="<?php echo $idusuario1[$i] ?>">
+
+                                            </form>
+                                        </div>
+
+                                    </div>
+                                <?php }
+                                if (isset($_POST['aceptarsolicitud'])) {
+                                    $solicitudid = $_POST['idsolicitud'];
+                                    $idusuariosol = $_POST['idsolicitante'];
+                                    $consultausuario = $conexion->query("INSERT INTO amistad VALUES (null," . $idusuariosol . ",$idusuario)");
+                                    $consultausuario = $conexion->query("DELETE FROM solicitudamistad WHERE idsolicitudamistad=" . $solicitudid);
+                                ?>
+                                    <script>
+                                        window.location.replace("detalleproy.php?idproyecto=<?php echo $idproyecto ?>");
+                                    </script>
+                                <?php
+                                }
+                                ?>
+
+                            </div>
+                        </li>
 
                         <div class="topbar-divider d-none d-sm-block"></div>
 
@@ -407,7 +480,7 @@ if($gasto == null){
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                                 Eventos próximos</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $cantidadeventos?></div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $cantidadeventos ?></div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-calendar fa-2x text-gray-300"></i>
@@ -462,10 +535,71 @@ if($gasto == null){
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
                                             <div class="dropdown-header">Dropdown Header:</div>
-                                            <a class="dropdown-item" href="#">Action</a>
-                                            <a class="dropdown-item" href="#">Another action</a>
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="#">Something else here</a>
+
+                                            <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#infoavances2" href="#">Crear evento</a>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal fade" style="margin-top:140px" id="infoavances2" tabindex="-1" role="dialog" aria-labelledby="tituloavance" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class=modal-header>
+                                                <h5 id="tituloavance">Crear evento</h5>
+                                                <button type="button" class="fa fa-times" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div>
+                                                    <form action="detalleproy.php?idproyecto=<?php print_r($idproyecto) ?>" method="post" enctype="multipart/form-data">
+                                                        <div class="form-group">
+                                                            <label for="exampleFormControlInput1">Nombre evento (*)</label>
+                                                            <input type="text" name="nombreevento" class="form-control" id="exampleFormControlInput1">
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <label for="exampleFormControlTextarea1">Ingrese descripción (*):</label>
+                                                            <textarea id="descripcion2" name="descripcion2" style="height:100px; resize:none;" class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                                                        </div>
+
+
+                                                        <div class="form-group">
+                                                            <label for="exampleFormControlInput1">Fecha evento(*):</label>
+                                                            <input type="date" class="form-control mb-3" name="fechareporte" id="start" name="trip-start">
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <input style="margin-top:30px; color:white;" class="btn-primary" type="submit" name="ingresaravance" value="Ingresar">
+                                                        </div>
+
+                                                    </form>
+                                                    <?php
+                                                    if (isset($_POST['ingresaravance'])) {
+                                                        $nombreevento = $_POST['nombreevento'];
+                                                        $descr = $_POST['descripcion2'];
+                                                        $descr = trim($descr); //la funcion trim borra los espacios de al principio y al final
+                                                        $descr = htmlspecialchars($descr);
+                                                        $descr = stripslashes($descr);
+                                                        $fechaevento = $_POST['fechareporte'];
+                                                        $fechahoy = date("Y-m-d H:i:s");
+
+                                                        if (!$descr) {
+                                                            $errores .= 'Ingrese todos los campos obligatorios';
+                                                        } else {
+                                                            $consultausuario = $conexion->query("INSERT INTO notificaciones values (null,'" . $nombreevento . "','" . $descr . "',null,'" . $fechahoy . "','" .
+                                                                $fechaevento . "'," . $idproyecto . "," . $idusuario . ",null,1,null)");
+                                                        }
+                                                    ?>
+                                                        <script>
+                                                            window.location.replace("detalleproy.php?idproyecto=<?php echo $idproyecto ?>");
+                                                        </script>
+                                                    <?php
+                                                        if (!$errores) {
+                                                            $enviado = 'true';
+                                                        }
+                                                    }
+                                                    ?>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -473,95 +607,96 @@ if($gasto == null){
                                 <div class="card-body">
 
                                     <div class="table-responsive">
-                                        <?php 
-                                            if($cantidadeventos == 0){
-                                                ?>
-                                                <h3>No hay más eventos</h3>
-                                                <?php
-                                            }else{
+                                        <?php
+                                        if ($cantidadeventos == 0) {
+                                        ?>
+                                            <h3>No hay más eventos</h3>
+                                            <?php
+                                        } else {
                                             for ($i = 0; $i < $cantidadeventos; $i++) { ?>
                                                 <h3><?php echo $tituloevento[$i] ?></h3>
                                                 <?php echo $descripcionevento[$i] ?>
                                                 <br>
                                                 <i class="mr-2 fas fa-calendar-day"></i><?php echo $fechaevento[$i] ?>
-                                                
+
                                                 <i class="ml-1 mr-2 fas fa-clock"></i><?php echo $horaevento[$i] ?>
                                                 <hr>
-                                        <?php }}?>
+                                        <?php }
+                                        } ?>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Content Row -->
+
+
                     </div>
-
-                    <!-- Content Row -->
-
+                    <!-- /.container-fluid -->
 
                 </div>
-                <!-- /.container-fluid -->
+                <!-- End of Main Content -->
+
+                <!-- Footer -->
+                <footer class=" sticky-footer bg-white">
+                    <div class="container my-auto">
+                        <div class="copyright text-center my-auto">
+                            <span>Construpro &copy; </span>
+                        </div>
+                    </div>
+                </footer>
+                <!-- End of Footer -->
 
             </div>
-            <!-- End of Main Content -->
-
-            <!-- Footer -->
-            <footer  class=" sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Construpro &copy; </span>
-                    </div>
-                </div>
-            </footer>
-            <!-- End of Footer -->
+            <!-- End of Content Wrapper -->
 
         </div>
-        <!-- End of Content Wrapper -->
+        <!-- End of Page Wrapper -->
 
-    </div>
-    <!-- End of Page Wrapper -->
+        <!-- Scroll to Top Button-->
+        <a class="scroll-to-top rounded" href="#page-top">
+            <i class="fas fa-angle-up"></i>
+        </a>
 
-    <!-- Scroll to Top Button-->
-    <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fas fa-angle-up"></i>
-    </a>
-
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Cerrar sesión</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">¿Estás seguro de cerrar sesión?</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="cerrarsesion.php">Logout</a>
+        <!-- Logout Modal-->
+        <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Cerrar sesión</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">¿Estás seguro de cerrar sesión?</div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                        <a class="btn btn-primary" href="cerrarsesion.php">Logout</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Bootstrap core JavaScript-->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <!-- Bootstrap core JavaScript-->
+        <script src="vendor/jquery/jquery.min.js"></script>
+        <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Core plugin JavaScript-->
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+        <!-- Core plugin JavaScript-->
+        <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
 
-    <!-- Custom scripts for all pages-->
-    <script src="js/sb-admin-2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+        <!-- Custom scripts for all pages-->
+        <script src="js/sb-admin-2.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 
-    <!-- Page level plugins -->
-    <script src="vendor/chart.js/Chart.min.js"></script>
-    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
-    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-    <script src="js/demo/datatables-demo.js"></script>
+        <!-- Page level plugins -->
+        <script src="vendor/chart.js/Chart.min.js"></script>
+        <script src="vendor/datatables/jquery.dataTables.min.js"></script>
+        <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+        <script src="js/demo/datatables-demo.js"></script>
 
-    <!-- Page level custom scripts -->
-    <script src="js/demo/chart-area-demo.js"></script>
-    <script src="js/demo/chart-pie-demo.js"></script>
+        <!-- Page level custom scripts -->
+        <script src="js/demo/chart-area-demo.js"></script>
+        <script src="js/demo/chart-pie-demo.js"></script>
 
 </body>
 

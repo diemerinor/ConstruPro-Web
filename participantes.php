@@ -81,7 +81,7 @@ $cantidadparticipantes = sizeof($nombreparticipante);
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
-            <img style="width:30%" class="sidebar-card-illustration mb-2" src="img/LOGOblanco.png" alt="...">
+                <img style="width:30%" class="sidebar-card-illustration mb-2" src="img/LOGOblanco.png" alt="...">
                 <div class="sidebar-brand-text mx-3">Construpro</sup></div>
             </a>
 
@@ -151,10 +151,10 @@ $cantidadparticipantes = sizeof($nombreparticipante);
             </li>
 
             <!-- Nav Item - Tables -->
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Configuración</span></a>
+            <li class="nav-item ">
+                <a class="nav-link" href="contactos.php">
+                    <i class="fas fa-fw fa-user-friends"></i>
+                    <span>Contactos</span></a>
             </li>
 
 
@@ -193,6 +193,77 @@ $cantidadparticipantes = sizeof($nombreparticipante);
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
                         <!-- Nav Item - Search Dropdown (Visible Only XS) -->
+                        <?php
+                        $cantidadsolicitudes = 0;
+                        $idusuario1 = [];
+                        $nombresolicitante = [];
+                        $consultaavance = $conexion->query("SELECT * from solicitudamistad where idusuario2=" . $idusuario);
+                        while ($consultausuario = mysqli_fetch_array($consultaavance)) {
+                            $idusuario1[] = $consultausuario["idusuario1"];
+                            $idusuario2[] = $consultausuario["idusuario2"];
+                            $idsolicitudamistad[] = $consultausuario["idsolicitudamistad"];
+                            $consultaavance2 = $conexion->query("SELECT * from usuario US where 
+    US.idusuario=" . $consultausuario["idusuario1"]);
+                            while ($consultausuarios = mysqli_fetch_array($consultaavance2)) {
+                                $nombresolicitante[] = $consultausuarios["nombreusuario"] . " " . $consultausuarios["apellidos"];
+                                $imagensolicitante[] = $consultausuarios["fotoperfil"];
+                            }
+                        }
+
+                        if ($idusuario1) {
+                            $cantidadsolicitudes = sizeof($idusuario1);
+                        }
+
+                        ?>
+                        <li class="nav-item dropdown no-arrow mx-1">
+                            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-user-plus fa-fw"></i>
+                                <!-- Counter - Messages -->
+                                <span class="badge badge-danger badge-counter"><?php echo $cantidadsolicitudes ?></span>
+                            </a>
+                            <!-- Dropdown - Messages -->
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="messagesDropdown">
+                                <h6 class="dropdown-header">
+                                    Solicitudes de amistad
+                                </h6>
+                                <?php for ($i = 0; $i < $cantidadsolicitudes; $i++) { ?>
+                                    <div class="dropdown-item d-flex align-items-center">
+                                        <div class="dropdown-list-image mr-3">
+                                            <img class="rounded-circle" src="<?php echo $imagensolicitante[$i]; ?>" alt="...">
+                                            <div class="status-indicator bg-success"></div>
+                                        </div>
+                                        <div class="font-weight-bold">
+                                            <div class="text-truncate"><?php echo $nombresolicitante[$i]; ?></div>
+                                        </div>
+                                        <div class="d-flex ml-2">
+                                            <form action="participantes.php?idproyecto=<?php print_r($idproyecto) ?>" method="post" enctype="multipart/form-data">
+                                                <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm" type="submit" name="aceptarsolicitud" value="Aceptar">
+
+                                                <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm" type="submit" name="rechazarsolicitud" value="Eliminar">
+
+                                                <input type="hidden" name="idsolicitud" value="<?php echo $idsolicitudamistad[$i] ?>">
+                                                <input type="hidden" name="idsolicitante" value="<?php echo $idusuario1[$i] ?>">
+
+                                            </form>
+                                        </div>
+
+                                    </div>
+                                <?php }
+                                if (isset($_POST['aceptarsolicitud'])) {
+                                    $solicitudid = $_POST['idsolicitud'];
+                                    $idusuariosol = $_POST['idsolicitante'];
+                                    $consultausuario = $conexion->query("INSERT INTO amistad VALUES (null," . $idusuariosol . ",$idusuario)");
+                                    $consultausuario = $conexion->query("DELETE FROM solicitudamistad WHERE idsolicitudamistad=" . $solicitudid);
+                                ?>
+                                    <script>
+                                        window.location.replace("participantes.php?idproyecto=<?php echo $idproyecto ?>");
+                                    </script>
+                                <?php
+                                }
+                                ?>
+
+                            </div>
+                        </li>
                         <li class="nav-item dropdown no-arrow d-sm-none">
                             <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-search fa-fw"></i>
@@ -261,54 +332,75 @@ $cantidadparticipantes = sizeof($nombreparticipante);
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class=modal-header>
-                                    <h5 id="tituloavance">Crear reporte de avance</h5>
+                                    <h5 id="tituloavance">Agregar trabajador</h5>
                                     <button type="button" class="fa fa-times" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <div>
-                                        <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post" enctype="multipart/form-data">
-                                            <div class="form-group">
-                                                <label for="exampleFormControlInput1">Título reporte (*)</label>
-                                                <input type="text" name="nombre" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: Instalación de cerámicas">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="exampleFormControlInput1">Cantidad (*)</label>
-                                                <input type="text" onkeypress="return solonumeros(event)" name="precio" maxlength="7" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: 10000">
-                                            </div>
-                                            <?php
+                                    <div class="card shadow mb-4">
+                                        <div class="card-header py-3">
+                                            <h6 class="m-0 font-weight-bold text-primary">Contactos</h6>
+                                        </div>
+                                        <?php
+                                        $consultaamistad = $conexion->query("SELECT * FROM  usuario us, amistad am where (am.idusuario1 =" . $idusuario . " or am.idusuario2=" . $idusuario . ") and (am.idusuario1 = us.idusuario or am.idusuario2=us.idusuario)");
+                                        $participa = [];
 
-                                            $sql = "SELECT idunidaddemedida, nombreunidad FROM unidaddemedida";
-                                            $resultados = $conexion->query($sql);
-                                            echo 'Unidad de medida(*): <select style="margin-bottom:30px" name="tipop" id="tipo" class="form-control">';
-                                            echo '<option>Seleccione unidad de medida... </option>';
-                                            while ($row = mysqli_fetch_array($resultados)) {
-                                                if ($tipop == $row["nombreunidad"]) {
-                                                    echo '<option selected="true" value="' . $row["idunidaddemedida"] . '">' . $row["nombreunidad"] . '</option>';
-                                                } else {
-                                                    echo '<option value="' . $row["idunidaddemedida"] . '">' . $row["nombreunidad"] . '</option>';
+                                        while ($consultausuario = mysqli_fetch_array($consultaamistad)) {
+                                            if ($consultausuario["idusuario"] != $idusuario) {
+                                                $idusuarios[] = $consultausuario["idusuario"];
+                                                $nombrecontacto[] = $consultausuario["nombreusuario"] . ' ' . $consultausuario["apellidos"];
+                                                $result5 = $conexion->query("SELECT * from proyecto PR, participa PA, usuario US where PR.idproyecto=PA.idproyecto and
+                                                PA.idusuario = US.idusuario and US.idusuario=" . $consultausuario["idusuario"] . " and PR.idproyecto=" . $idproyecto);
+                                                while ($row3 = $result5->fetch_array()) {
+                                                    $participa[] = $row3["codigorol"];
                                                 }
                                             }
-                                            echo '</select>';
-                                            ?>
-
-
-
-                                            <div class="form-group">
-                                                <label for="exampleFormControlFile1">Adjunte archivo (*)</label>
-                                                <input name="fichero" class="fichero" type="file" class="form-control-file" id="exampleFormControlFile1">
+                                        }
+                                        $cantidadcontactos = sizeof($nombrecontacto);
+                                        ?>
+                                        <div class="card-body">
+                                            <div style="overflow-x:hidden;" class="table-responsive">
+                                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Nombre contacto</th>
+                                                            <th>Acción</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php for ($i = 0; $i < $cantidadcontactos; $i++) { ?>
+                                                            <tr>
+                                                                <td><?php echo $nombrecontacto[$i] ?></td>
+                                                                <td><?php 
+                                                                    if (!isset($participa[$i])) {
+                                                                        echo '<a style="color:white" class="btn btn-success mt-2">Ya participa en el proyecto</a>';
+                                                                    } else {
+                                                                        echo '<a style="color:white" class="btn btn-primary mt-2">Agregar</a>';
+                                                                    }
+                                                                    ?>
+                                                                </td>
+                                                            </tr>
+                                                        <?php } ?>
+                                                    </tbody>
+                                                </table>
                                             </div>
-
-                                            <div class="form-group">
-                                                <a href="#" type="submit" name="ingresar" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                                    <i class="fas fa-download fa-sm text-white-50"></i> Registrar reporte</a>
-
-                                            </div>
-                                        </form>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <?php
+                    if (isset($_GET['ingresar'])) {
+                        $nombrebuscar = $_GET['nombre'];
+
+                        $result3 = $conexion->query("SELECT * from usuario where nombreusuario like '%$nombrebuscar'");
+
+                        while ($row = $result3->fetch_array()) {
+                            echo $row['apellidos'];
+                        }
+                    }
+                    ?>
 
                     <div class="container-fluid">
 

@@ -5,10 +5,10 @@ include('conexion.php');
 session_start();
 $usuario = '';
 $idusuario;
-$cantidadmateriales = 0;
+$cantidadavances = 0;
 $cantidadeventos = 0;
 $cantidadmateriales = 0;
-$cantidadmateriales = 0;
+$cantidadavances = 0;
 
 if (!isset($_SESSION['loggeado'])) {
     $inicio = "no";
@@ -16,48 +16,52 @@ if (!isset($_SESSION['loggeado'])) {
     $idusuario = $_SESSION['loggeado'];
     $inicio = "si";
 }
-$idproyecto = $_GET['idproyecto'];
-if (empty($idproyecto)) {
-    header('Location: index.php');
+if ($inicio == "no") {
+    header('Location: login.php');
 }
 //CONSULTA USUARIO
-$consultaavance = $conexion->query("SELECT * from usuario where
-    idusuario=" . $idusuario);
+$consultaavance = $conexion->query("SELECT nombreusuario,apellidos from usuario where idusuario=" . $idusuario);
 while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $nombreusuario = $consultausuario["nombreusuario"];
     $apellidos = $consultausuario["apellidos"];
 }
-
-$consultaavance = $conexion->query("SELECT * from usuario us, proyecto pr, participa pa where
-    pa.idproyecto= pr.idproyecto and pa.idusuario = us.idusuario and
-    pr.idproyecto =".$idproyecto." and
-    us.idusuario=".$idusuario);
-while ($consultausuario = mysqli_fetch_array($consultaavance)) {
-    $idproyecto2 = $consultausuario["idproyecto"];
+//CONSULTA PROYECTOS
+$consulta = "SELECT * from proyecto PR, usuario US, participa PA WHERE 
+            PR.idproyecto = PA.idproyecto AND 
+            US.idusuario = PA.idusuario AND
+            US.idusuario =" . $idusuario;
+$resultado = $conexion->query($consulta);
+$idproyectos = [];
+while ($consultaproyecto = mysqli_fetch_array($resultado)) {
+    $idproyectos[] = $consultaproyecto["idproyecto"];
+    $nombreproyecto[] = $consultaproyecto["nombreproyecto"];
+    $descripcionproyecto[] = $consultaproyecto["descripcionproyecto"];
+    $imagen[] = $consultaproyecto["rutaimagen"];
 }
-if (empty($idproyecto2)) {
-    header('Location: index.php');
+if ($idproyectos != null) {
+    $cantidadproyectos = sizeof($idproyectos);
+} else {
+    $cantidadproyectos = 0;
 }
 
-
-$consultamateriales = $conexion->query("SELECT * FROM proyecto pr, usuario us, participa pa, rol ro
-where ro.CodigoRol = pa.codigorol and pr.idproyecto= pa.idproyecto and us.idusuario = pa.idusuario and pr.idproyecto=".$idproyecto);
-    while ($consultausuario = mysqli_fetch_array($consultamateriales)) {
-        $nombreparticipante[] = $consultausuario["nombreusuario"].' '.$consultausuario["apellidos"];
-        $nombrerol[] = $consultausuario["NombreRol"];
-        $nombreproyecto[0] = $consultausuario["nombreproyecto"];
-    }
-    $cantidadparticipantes = sizeof($nombreparticipante); 
-$nombrearchivo = [];
- //CONSULTA ARCHIVOS
-$consultaavance = $conexion->query("SELECT * from proyecto pr, archivos ar where pr.idproyecto = ar.idproyecto and pr.idproyecto=".$idproyecto);
-while ($consultausuario = mysqli_fetch_array($consultaavance)) {
-$rutaarchivo[] = $consultausuario["rutaarchivo"];
-$nombrearchivo[] = $consultausuario["nombrearchivo"];
+?>
+<script type="text/javascript">
+    let ultimoval = [];
+    let fechas = [];
+    let sumamts = [];
+    let nombresec = [];
+    let cantidadav = "<?php echo $cantidadavances ?>"
+</script>
+<?php
+for ($i = 0; $i < $cantidadavances; $i++) {
+?>
+    <script type="text/javascript">
+        fechas.push("<?php echo $fechareporte[$i]; ?>");
+        ultimoval.push("<?php echo $metrosavanzados[$i]; ?>");
+    </script>
+<?php
 }
-if($nombrearchivo != null){   
-$cantidadarchivos = sizeof($nombrearchivo); }
- ?>
+?>
 
 <head>
 
@@ -67,7 +71,7 @@ $cantidadarchivos = sizeof($nombrearchivo); }
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Archivos</title>
+    <title>Construpro</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
     <!-- Custom fonts for this template-->
@@ -85,22 +89,22 @@ $cantidadarchivos = sizeof($nombrearchivo); }
     <div id="wrapper">
 
         <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar" style="background: url(img/fondo2.png);">
+        <ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar" style="background: url(img/fondo2.png);">
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
-            <img style="width:30%" class="sidebar-card-illustration mb-2" src="img/LOGOblanco.png" alt="...">
-                <div class="sidebar-brand-text mx-3">Construpro</sup></div>
+                <img style="width:30%" class="sidebar-card-illustration mb-2" src="img/LOGOblanco.png" alt="...">
+                <div class="sidebar-brand-text mx-3">Construpro</div>
             </a>
 
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item">
-                <a class="nav-link" href="detalleproy.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Tablero</span></a>
+            <li class="nav-item ">
+                <a class="nav-link" href="index.php">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Inicio</span></a>
             </li>
 
             <!-- Divider -->
@@ -108,71 +112,46 @@ $cantidadarchivos = sizeof($nombrearchivo); }
 
             <!-- Heading -->
             <div class="sidebar-heading">
-                Gestión
-            </div>
-
-            <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item ">
-                <a class="nav-link" href="charts.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-chart-area"></i>
-                    <span>Avances</span></a>
-            </li>
-
-            <!-- Nav Item - Utilities Collapse Menu -->
-            <li class="nav-item">
-                <a class="nav-link" href="finanzas.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-dollar-sign"></i>
-                    <span>Finanzas</span></a>
-            </li>
-            
-            <li class="nav-item ">
-                <a class="nav-link" href="materiales.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-wrench"></i>
-                    <span>Materiales</span></a>
-            </li>
-            <li class="nav-item ">
-                <a class="nav-link" href="participantes.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-users"></i>
-                    <span>Participantes</span></a>
-            </li>
-            <li class="nav-item active">
-                <a class="nav-link" href="archivos.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-file"></i>
-                    <span>Archivos</span></a>
-            </li>
-            <!-- Divider -->
-            <hr class="sidebar-divider">
-
-             <!-- Heading -->
-             <div class="sidebar-heading">
                 Cuenta
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-           
-
-            <!-- Nav Item - Charts -->
             <li class="nav-item">
                 <a class="nav-link" href="#">
                     <i class="fas fa-fw fa-user"></i>
-                    <span>Cuenta</span></a>
+                    <span>Mi perfil</span></a>
             </li>
 
-            <!-- Nav Item - Tables -->
-            <li class="nav-item ">
-                <a class="nav-link" href="contactos.php">
+            <!-- Nav Item - Utilities Collapse Menu -->
+            <li class="nav-item active">
+                <a class="nav-link" href="#">
                     <i class="fas fa-fw fa-user-friends"></i>
                     <span>Buscar contactos</span></a>
             </li>
 
-
             <!-- Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Super Admin
+            </div>
+
+            <!-- Nav Item - Pages Collapse Menu -->
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Crear cuenta</span></a>
+            </li>
+
+
 
             <!-- Sidebar Toggler (Sidebar) -->
             <div class="text-center d-none d-md-inline">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
+
+            <!-- Sidebar Message -->
             <div class="sidebar-card d-none d-lg-flex">
                 <img class="sidebar-card-illustration mb-2" src="img/undraw_rocket.svg" alt="...">
                 <p class="text-center mb-2"><strong>ConstruPro Premium</strong> está repleto de características premium, componentes y mucho más.</p>
@@ -181,6 +160,7 @@ $cantidadarchivos = sizeof($nombrearchivo); }
 
         </ul>
         <!-- End of Sidebar -->
+
 
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
@@ -195,12 +175,13 @@ $cantidadarchivos = sizeof($nombrearchivo); }
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                         <i class="fa fa-bars"></i>
                     </button>
-                    <h4><?php echo $nombreproyecto[0] ?></h4>
+
 
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
-                    <?php
+
+                        <?php
                         $cantidadsolicitudes = 0;
                         $idusuario1 = [];
                         $nombresolicitante = [];
@@ -243,7 +224,7 @@ $cantidadarchivos = sizeof($nombrearchivo); }
                                             <div class="text-truncate"><?php echo $nombresolicitante[$i]; ?></div>
                                         </div>
                                         <div class="d-flex ml-2">
-                                            <form action="archivos.php?idproyecto=<?php print_r($idproyecto) ?>" method="post" enctype="multipart/form-data">
+                                            <form action="contactos.php" method="post" enctype="multipart/form-data">
                                                 <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm" type="submit" name="aceptarsolicitud" value="Aceptar">
 
                                                 <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm" type="submit" name="rechazarsolicitud" value="Eliminar">
@@ -263,7 +244,7 @@ $cantidadarchivos = sizeof($nombrearchivo); }
                                     $consultausuario = $conexion->query("DELETE FROM solicitudamistad WHERE idsolicitudamistad=" . $solicitudid);
                                 ?>
                                     <script>
-                                        window.location.replace("archivos.php?idproyecto=<?php echo $idproyecto ?>");
+                                        window.location.replace("contactos.php");
                                     </script>
                                 <?php
                                 }
@@ -271,26 +252,6 @@ $cantidadarchivos = sizeof($nombrearchivo); }
 
                             </div>
                         </li>
-                        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
-                        <li class="nav-item dropdown no-arrow d-sm-none">
-                            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-search fa-fw"></i>
-                            </a>
-                            <!-- Dropdown - Messages -->
-                            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in" aria-labelledby="searchDropdown">
-                                <form class="form-inline mr-auto w-100 navbar-search">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Buscar material" aria-describedby="basic-addon2">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-primary" type="button">
-                                                <i class="fas fa-search fa-sm"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </li>
-
 
                         <div class="topbar-divider d-none d-sm-block"></div>
 
@@ -331,98 +292,125 @@ $cantidadarchivos = sizeof($nombrearchivo); }
                 <div class="container-fluid">
 
                     <!-- Page Heading -->
-                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Archivos</h1>
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#infoavances2" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                            <i class="fas fa-download fa-sm text-white-50"></i> Agregar archivo</a>
-                    </div>
-                    <div class="modal fade" style="margin-top:140px" id="infoavances2" tabindex="-1" role="dialog" aria-labelledby="tituloavance" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class=modal-header>
-                                    <h5 id="tituloavance">Crear reporte de avance</h5>
-                                    <button type="button" class="fa fa-times" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div>
-                                        <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post" enctype="multipart/form-data">
-                                            <div class="form-group">
-                                                <label for="exampleFormControlInput1">Título reporte (*)</label>
-                                                <input type="text" name="nombre" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: Instalación de cerámicas">
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="exampleFormControlInput1">Cantidad (*)</label>
-                                                <input type="text" onkeypress="return solonumeros(event)" name="precio" maxlength="7" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: 10000">
-                                            </div>
-                                            <?php
 
-                                            $sql = "SELECT idunidaddemedida, nombreunidad FROM unidaddemedida";
-                                            $resultados = $conexion->query($sql);
-                                            echo 'Unidad de medida(*): <select style="margin-bottom:30px" name="tipop" id="tipo" class="form-control">';
-                                            echo '<option>Seleccione unidad de medida... </option>';
-                                            while ($row = mysqli_fetch_array($resultados)) {
-                                                if ($tipop == $row["nombreunidad"]) {
-                                                    echo '<option selected="true" value="' . $row["idunidaddemedida"] . '">' . $row["nombreunidad"] . '</option>';
-                                                } else {
-                                                    echo '<option value="' . $row["idunidaddemedida"] . '">' . $row["nombreunidad"] . '</option>';
-                                                }
-                                            }
-                                            echo '</select>';
-                                            ?>
+                    <form class="d-flex mb-3" action="" method="get">
+                        <input style="width:50%" type="text" name="nombre" class="form-control" id="exampleFormControlInput1" placeholder="Escribe el usuario que deseas buscar">
+                        <!-- <a type="submit" style="color:white" class="ml-2 btn btn-primary" name="ingresar">Buscar</a> -->
+                        <input type="submit" class="ml-2 btn btn-primary" name="ingresar" value="Buscar">
 
+                    </form>
 
+                    <?php
+                    include('conexion.php');
+                    $nombrecontactos = [];
+                    $apellidocontactos = [];
+                    $idusuarios = [];
+                    $agregado = [];
+                    $solicitud = [];
+                    $cantidadcontactos = 0;
 
-                                            <div class="form-group">
-                                                <label for="exampleFormControlFile1">Adjunte archivo (*)</label>
-                                                <input name="fichero" class="fichero" type="file" class="form-control-file" id="exampleFormControlFile1">
-                                            </div>
+                    if (isset($_GET['ingresar'])) {
+                        $nombrebuscar = $_GET['nombre'];
+                        if ($nombrebuscar != '') {
+                            $result3 = $conexion->query("SELECT * from usuario where (nombreusuario LIKE '%$nombrebuscar' or apellidos LIKE '%$nombrebuscar') and
+                        idusuario !=" . $idusuario);
 
-                                            <div class="form-group">
-                                                <a href="#" type="submit" name="ingresar" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                                    <i class="fas fa-download fa-sm text-white-50"></i> Registrar reporte</a>
+                            while ($row = $result3->fetch_array()) {
+                                $result4 = $conexion->query("SELECT * from amistad where (idusuario1 =" . $idusuario . " && idusuario2=" . $row["idusuario"] . ") or
+                                (idusuario1 =" . $row["idusuario"] . " && idusuario2=" . $idusuario . ")
+                                ");
+                                while ($row2 = $result4->fetch_array()) {
+                                    $agregado[] = $row2["idamistad"];
+                                }
+                                if ($agregado == null) {
+                                    $result5 = $conexion->query("SELECT * from solicitudamistad where (idusuario1 =" . $idusuario . " && idusuario2=" . $row["idusuario"] . ") or
+                                (idusuario1 =" . $row["idusuario"] . " && idusuario2=" . $idusuario . ")");
+                                    while ($row3 = $result5->fetch_array()) {
+                                        $solicitud[] = $row3["idsolicitudamistad"];
+                                    }
+                                }
 
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                $nombrecontactos[] = $row["nombreusuario"];
+                                $apellidocontactos[] = $row["apellidos"];
+                                $idusuarios[] = $row["idusuario"];
+                            }
+                            if ($nombrecontactos != null) {
+                                $cantidadcontactos = sizeof($nombrecontactos);
+                            }
+                        }
+                    }
+                    ?>
 
-                    <div class="container-fluid">
-
-                  
-
-                    <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary"></h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Usuarios</h6>
                         </div>
                         <div class="card-body">
                             <div style="overflow-x:hidden;" class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
-                                            <th>Nombre archivo</th>
+                                            <th>Nombre</th>
                                             <th>Acción</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php 
-                                        if($nombrearchivo!=null){for($i=0;$i<$cantidadarchivos;$i++){?>
-                                        <tr>
-                                            <td><?php echo $nombrearchivo[$i]?></td>
-                                            <td><a href="<?php print_r($rutaarchivo[$i]) ?>"download="<?php echo $nombrearchivo[$i]?>"class="btn btn-success mt-2">Ver</a>
-                                            <a href="<?php print_r($rutaarchivo[$i]) ?>"download="<?php echo $nombrearchivo[$i]?>"class="btn btn-danger mt-2">Eliminar</a></td>
-                                        </tr>
-                                        <?php }}?>
+
+                                        <?php
+                                        for ($i = 0; $i < $cantidadcontactos; $i++) {
+
+                                        ?>
+                                            <tr>
+                                                <form action="contactos.php" method="POST">
+                                                    <input type="hidden" name="idusuario" value="<?php echo $idusuarios[$i] ?> ">
+
+                                                    <td name="nombreseccion"><?php echo $nombrecontactos[$i] . " " . $apellidocontactos[$i]; ?></td>
+                                                    <td>
+                                                        <?php
+                                                        if ($agregado == null && $solicitud == null) {
+                                                        ?>
+                                                            <input name="agregar" class="btn btn-primary mt-2" onclick="eliminar()" type="submit" value="Agregar">
+
+                                                        <?php
+                                                        } else if ($agregado) {
+                                                        ?>
+                                                            <button class="btn btn-success" type="button">Ya son amigos</button>
+                                                        <?php
+                                                        } else if ($solicitud) {
+                                                        ?>
+                                                            <button class="btn btn-success" type="button">Hay una solicitud pendiente</button>
+                                                        <?php
+                                                        }
+                                                        ?>
+                                                    </td>
+
+                                                </form>
+                                            </tr>
+                                        <?php } ?>
+
+                                        <?php
+                                        if (isset($_POST['agregar'])) {
+                                            $idusuarioagregado = $_POST['idusuario'];
+                                            $consultausuario = $conexion->query("INSERT INTO solicitudamistad VALUES (null," . $idusuario . "," . $idusuarioagregado . ")");
+
+                                        ?>
+                                            <script>
+                                                window.location.replace("contactos.php");
+                                            </script>
+                                        <?php
+
+                                        }
+                                        ?>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
 
-                </div>
+
+
+
+
                 </div>
                 <!-- /.container-fluid -->
 
@@ -433,7 +421,7 @@ $cantidadarchivos = sizeof($nombrearchivo); }
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                    <span>Construpro &copy; </span>
+                        <span>Construpro &copy; </span>
                     </div>
                 </div>
             </footer>
@@ -478,16 +466,14 @@ $cantidadarchivos = sizeof($nombrearchivo); }
 
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 
     <!-- Page level plugins -->
     <script src="vendor/chart.js/Chart.min.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 
     <!-- Page level custom scripts -->
-    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
-    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-    <script src="js/demo/datatables-demo.js"></script>
+    <script src="js/demo/chart-area-demo.js"></script>
+    <script src="js/demo/chart-pie-demo.js"></script>
 
 </body>
 

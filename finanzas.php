@@ -201,10 +201,10 @@ for ($i = 0; $i < $cantidadmov; $i++) {
             </li>
 
             <!-- Nav Item - Tables -->
-            <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Configuración</span></a>
+            <li class="nav-item ">
+                <a class="nav-link" href="contactos.php">
+                    <i class="fas fa-fw fa-user-friends"></i>
+                    <span>Buscar contactos</span></a>
             </li>
 
 
@@ -243,7 +243,77 @@ for ($i = 0; $i < $cantidadmov; $i++) {
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
+                    <?php
+                        $cantidadsolicitudes = 0;
+                        $idusuario1 = [];
+                        $nombresolicitante = [];
+                        $consultaavance = $conexion->query("SELECT * from solicitudamistad where idusuario2=" . $idusuario);
+                        while ($consultausuario = mysqli_fetch_array($consultaavance)) {
+                            $idusuario1[] = $consultausuario["idusuario1"];
+                            $idusuario2[] = $consultausuario["idusuario2"];
+                            $idsolicitudamistad[] = $consultausuario["idsolicitudamistad"];
+                            $consultaavance2 = $conexion->query("SELECT * from usuario US where 
+    US.idusuario=" . $consultausuario["idusuario1"]);
+                            while ($consultausuarios = mysqli_fetch_array($consultaavance2)) {
+                                $nombresolicitante[] = $consultausuarios["nombreusuario"] . " " . $consultausuarios["apellidos"];
+                                $imagensolicitante[] = $consultausuarios["fotoperfil"];
+                            }
+                        }
 
+                        if ($idusuario1) {
+                            $cantidadsolicitudes = sizeof($idusuario1);
+                        }
+
+                        ?>
+                        <li class="nav-item dropdown no-arrow mx-1">
+                            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-user-plus fa-fw"></i>
+                                <!-- Counter - Messages -->
+                                <span class="badge badge-danger badge-counter"><?php echo $cantidadsolicitudes ?></span>
+                            </a>
+                            <!-- Dropdown - Messages -->
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="messagesDropdown">
+                                <h6 class="dropdown-header">
+                                    Solicitudes de amistad
+                                </h6>
+                                <?php for ($i = 0; $i < $cantidadsolicitudes; $i++) { ?>
+                                    <div class="dropdown-item d-flex align-items-center">
+                                        <div class="dropdown-list-image mr-3">
+                                            <img class="rounded-circle" src="<?php echo $imagensolicitante[$i]; ?>" alt="...">
+                                            <div class="status-indicator bg-success"></div>
+                                        </div>
+                                        <div class="font-weight-bold">
+                                            <div class="text-truncate"><?php echo $nombresolicitante[$i]; ?></div>
+                                        </div>
+                                        <div class="d-flex ml-2">
+                                            <form action="finanzas.php?idproyecto=<?php print_r($idproyecto) ?>" method="post" enctype="multipart/form-data">
+                                                <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm" type="submit" name="aceptarsolicitud" value="Aceptar">
+
+                                                <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm" type="submit" name="rechazarsolicitud" value="Eliminar">
+
+                                                <input type="hidden" name="idsolicitud" value="<?php echo $idsolicitudamistad[$i] ?>">
+                                                <input type="hidden" name="idsolicitante" value="<?php echo $idusuario1[$i] ?>">
+
+                                            </form>
+                                        </div>
+
+                                    </div>
+                                <?php }
+                                if (isset($_POST['aceptarsolicitud'])) {
+                                    $solicitudid = $_POST['idsolicitud'];
+                                    $idusuariosol = $_POST['idsolicitante'];
+                                    $consultausuario = $conexion->query("INSERT INTO amistad VALUES (null," . $idusuariosol . ",$idusuario)");
+                                    $consultausuario = $conexion->query("DELETE FROM solicitudamistad WHERE idsolicitudamistad=" . $solicitudid);
+                                ?>
+                                    <script>
+                                        window.location.replace("finanzas.php?idproyecto=<?php echo $idproyecto ?>");
+                                    </script>
+                                <?php
+                                }
+                                ?>
+
+                            </div>
+                        </li>
                         <!-- Nav Item - Search Dropdown (Visible Only XS) -->
                         <li class="nav-item dropdown no-arrow d-sm-none">
                             <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -313,7 +383,7 @@ for ($i = 0; $i < $cantidadmov; $i++) {
                             <div class="modal-content">
                                 <div class=modal-header>
                                     <h5 id="tituloavance">Registrar reporte financiero</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    <button type="button" class="fa fa-times" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div>
@@ -416,15 +486,27 @@ for ($i = 0; $i < $cantidadmov; $i++) {
                                                                                         } else { ?></td>
                                                                 <td class="text-danger"><?php echo '-$' . $movimiento[$i] * (-1);
                                                                                         } ?></td>
-                                                                <?php if ($rol == 1) { ?><td><a href="<?php print_r($rutaarchivo[$i]) ?>" download="<?php echo $nombrearchivo[$i] ?>" class="btn btn-success mt-2">
+                                                                <?php if ($rol == 1) { ?><td><a href="editarfinanzas.php?idnotificacion=<?php echo $idnotificaciones[$i]?>&idproyecto=<?php echo$idproyecto?>"  class="btn btn-success mt-2">
                                                                             <i class="fas fa-edit"></i></a>
 
-                                                                        <input name="eliminar" class="btn btn-danger mt-2" onclick="eliminar()" type="submit" value="Eliminar">
+                                                                        <input class="btn btn-danger mt-2" onclick="eliminar(<?php echo $idnotificaciones[$i] ?>,<?php echo $idproyecto ?>)" type="button" value="Eliminar">
 
                                                                     </td> <?php } ?>
 
                                                             </form>
                                                         </tr>
+
+                                                        <script type="text/javascript">
+                                                            function eliminar(idreporte, idproyecto) {
+                                                                if (confirm("¿Estás seguro de eliminar este reporte financiero?")) {
+                                                                    window.location.replace("eliminarfinanzas.php?idfinanzas=" + idreporte + "&idproyecto=" + idproyecto);
+                                                                } else {
+                                                                    return
+                                                                };
+                                                            }
+                                                        </script>
+
+
                                                     <?php }
                                                     if (isset($_POST['eliminar'])) {
                                                         $idproyectoeliminar = $_POST['idavance'];

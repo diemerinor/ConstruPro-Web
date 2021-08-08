@@ -124,9 +124,9 @@ for ($i = 0; $i < $cantidadavances; $i++) {
 
             <!-- Nav Item - Utilities Collapse Menu -->
             <li class="nav-item">
-                <a class="nav-link" href="#">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Configuración</span></a>
+                <a class="nav-link" href="contactos.php">
+                    <i class="fas fa-fw fa-user-friends"></i>
+                    <span>Buscar contactos</span></a>
             </li>
 
             <!-- Divider -->
@@ -180,7 +180,77 @@ for ($i = 0; $i < $cantidadavances; $i++) {
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
+                        <?php
+                        $cantidadsolicitudes = 0;
+                        $idusuario1 = [];
+                        $nombresolicitante = [];
+                        $consultaavance = $conexion->query("SELECT * from solicitudamistad where idusuario2=" . $idusuario);
+                        while ($consultausuario = mysqli_fetch_array($consultaavance)) {
+                            $idusuario1[] = $consultausuario["idusuario1"];
+                            $idusuario2[] = $consultausuario["idusuario2"];
+                            $idsolicitudamistad[] = $consultausuario["idsolicitudamistad"];
+                            $consultaavance2 = $conexion->query("SELECT * from usuario US where 
+    US.idusuario=" . $consultausuario["idusuario1"]);
+                            while ($consultausuarios = mysqli_fetch_array($consultaavance2)) {
+                                $nombresolicitante[] = $consultausuarios["nombreusuario"] . " " . $consultausuarios["apellidos"];
+                                $imagensolicitante[] = $consultausuarios["fotoperfil"];
+                            }
+                        }
 
+                        if ($idusuario1) {
+                            $cantidadsolicitudes = sizeof($idusuario1);
+                        }
+
+                        ?>
+                        <li class="nav-item dropdown no-arrow mx-1">
+                            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-user-plus fa-fw"></i>
+                                <!-- Counter - Messages -->
+                                <span class="badge badge-danger badge-counter"><?php echo $cantidadsolicitudes ?></span>
+                            </a>
+                            <!-- Dropdown - Messages -->
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="messagesDropdown">
+                                <h6 class="dropdown-header">
+                                    Solicitudes de amistad
+                                </h6>
+                                <?php for ($i = 0; $i < $cantidadsolicitudes; $i++) { ?>
+                                    <div class="dropdown-item d-flex align-items-center">
+                                        <div class="dropdown-list-image mr-3">
+                                            <img class="rounded-circle" src="<?php echo $imagensolicitante[$i]; ?>" alt="...">
+                                            <div class="status-indicator bg-success"></div>
+                                        </div>
+                                        <div class="font-weight-bold">
+                                            <div class="text-truncate"><?php echo $nombresolicitante[$i]; ?></div>
+                                        </div>
+                                        <div class="d-flex ml-2">
+                                            <form action="index.php" method="post" enctype="multipart/form-data">
+                                                <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm" type="submit" name="aceptarsolicitud" value="Aceptar">
+
+                                                <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm" type="submit" name="rechazarsolicitud" value="Eliminar">
+
+                                                <input type="hidden" name="idsolicitud" value="<?php echo $idsolicitudamistad[$i] ?>">
+                                                <input type="hidden" name="idsolicitante" value="<?php echo $idusuario1[$i] ?>">
+
+                                            </form>
+                                        </div>
+
+                                    </div>
+                                <?php }
+                                if (isset($_POST['aceptarsolicitud'])) {
+                                    $solicitudid = $_POST['idsolicitud'];
+                                    $idusuariosol = $_POST['idsolicitante'];
+                                    $consultausuario = $conexion->query("INSERT INTO amistad VALUES (null," . $idusuariosol . ",$idusuario)");
+                                    $consultausuario = $conexion->query("DELETE FROM solicitudamistad WHERE idsolicitudamistad=" . $solicitudid);
+                                ?>
+                                    <script>
+                                        window.location.replace("index.php");
+                                    </script>
+                                <?php
+                                }
+                                ?>
+
+                            </div>
+                        </li>
 
 
                         <div class="topbar-divider d-none d-sm-block"></div>
@@ -326,35 +396,43 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                             '" . $descr . "'," . $categoria . "," . $idusuario . ",'" . $destino . "',
                             " . $comuna . ",0," . $capitalinicial . ",'" . $fechainicial . "','" . $fechatermino . "')";
                                                         $result = $conexion->query($sql);
-
-                                                        $result3 = $conexion->query("SELECT MAX(idproyecto) from proyecto");
-                                                        $idproyecto2 = mysqli_fetch_array($result3);
-                                                        $idproyectocreado = $idproyecto2[0];
-
-
-                                                        $consultausuario = $conexion->query("INSERT INTO participa VALUES (" . $idproyectocreado . "," . $idusuario . ",1)");
-                                                        $consultausuario = $conexion->query("INSERT INTO secciones VALUES (null," . $idproyectocreado . ",'Principal', 'Seccion principal',0,1,1,0)");
-                                                        $consultausuario = $conexion->query("INSERT INTO cargoproyecto VALUES (null,'Administrador'," . $idproyectocreado . ",'Tiene acceso total')");
-
-
-
-                                                        $result3 = $conexion->query("SELECT MAX(idcargo) from cargoproyecto");
-                                                        $idcargo = mysqli_fetch_array($result3);
-                                                        $idcargocreado = $idcargo[0];
-
-                                                        $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",1,1)");
-                                                        $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",2,1)");
-                                                        $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",3,1)");
-                                                        $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",4,1)");
-
-                                                        $fechahoy = date('Y-m-d');
-                                                        $consultausuario = $conexion->query("INSERT INTO notificaciones values (null,'Inversión inicial',null," . $capitalinicial . ",'" . $fechahoy . "',null,
-		                                                                             " . $idproyectocreado . "," . $idusuario . ",1,2,'" . $fechahoy . "')");
-                                                        $consultausuario = $conexion->query("INSERT INTO poseecargo VALUES (null," . $idusuario . "," . $idcargocreado . "," . $idproyectocreado . ")");
                                                     }
                                                 } else {
-                                                    $errores .= 'Ingrese Una foto de su mascota';
+                                                    $sql = "INSERT INTO proyecto VALUES (null,'" . $nombreproyecto . "',
+                            '" . $descr . "'," . $categoria . "," . $idusuario . ",'img/sinfotoproyecto.jpg',
+                            " . $comuna . ",0," . $capitalinicial . ",'" . $fechainicial . "','" . $fechatermino . "')";
+                                                    $result = $conexion->query($sql);
                                                 }
+                                                $result3 = $conexion->query("SELECT MAX(idproyecto) from proyecto");
+                                                $idproyecto2 = mysqli_fetch_array($result3);
+                                                $idproyectocreado = $idproyecto2[0];
+
+
+                                                $consultausuario = $conexion->query("INSERT INTO participa VALUES (" . $idproyectocreado . "," . $idusuario . ",1)");
+                                                $consultausuario = $conexion->query("INSERT INTO secciones VALUES (null," . $idproyectocreado . ",'Principal', 'Seccion principal',0,1,1,0)");
+                                                $consultausuario = $conexion->query("INSERT INTO cargoproyecto VALUES (null,'Administrador'," . $idproyectocreado . ",'Tiene acceso total')");
+
+
+
+                                                $result3 = $conexion->query("SELECT MAX(idcargo) from cargoproyecto");
+                                                $idcargo = mysqli_fetch_array($result3);
+                                                $idcargocreado = $idcargo[0];
+
+                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",1,1)");
+                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",2,1)");
+                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",3,1)");
+                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",4,1)");
+
+                                                $fechahoy = date('Y-m-d');
+                                                $consultausuario = $conexion->query("INSERT INTO notificaciones values (null,'Inversión inicial',null," . $capitalinicial . ",'" . $fechahoy . "',null,
+		                                                                             " . $idproyectocreado . "," . $idusuario . ",1,2,'" . $fechahoy . "')");
+                                                $consultausuario = $conexion->query("INSERT INTO poseecargo VALUES (null," . $idusuario . "," . $idcargocreado . "," . $idproyectocreado . ")");
+
+                                        ?>
+                                                <script>
+                                                    window.location.replace("index.php");
+                                                </script>
+                                        <?php
                                             }
                                             if (!$errores) {
                                                 $enviado = 'true';
