@@ -122,10 +122,15 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                     <span>Mi perfil</span></a>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link" href="miscontactos.php">
+                    <i class="fas fa-users"></i>
+                    <span>Mis contactos</span></a>
+            </li>
             <!-- Nav Item - Utilities Collapse Menu -->
             <li class="nav-item active">
                 <a class="nav-link" href="#">
-                    <i class="fas fa-fw fa-user-friends"></i>
+                    <i class="fas fa-fw fa-search"></i>
                     <span>Buscar contactos</span></a>
             </li>
 
@@ -155,7 +160,7 @@ for ($i = 0; $i < $cantidadavances; $i++) {
             <div class="sidebar-card d-none d-lg-flex">
                 <img class="sidebar-card-illustration mb-2" src="img/undraw_rocket.svg" alt="...">
                 <p class="text-center mb-2"><strong>ConstruPro Premium</strong> está repleto de características premium, componentes y mucho más.</p>
-                <a class="btn btn-success btn-sm" href="#">Hazte Premium</a>
+                <a class="btn btn-success btn-sm" href="haztepremium.php">Hazte Premium</a>
             </div>
 
         </ul>
@@ -346,7 +351,7 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                             <h6 class="m-0 font-weight-bold text-primary">Usuarios</h6>
                         </div>
                         <div class="card-body">
-                            <div style="overflow-x:hidden;" class="table-responsive">
+                            <div  class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>

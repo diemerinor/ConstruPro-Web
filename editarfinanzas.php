@@ -165,11 +165,15 @@ if (empty($idproyecto2)) {
                     <i class="fas fa-fw fa-user"></i>
                     <span>Cuenta</span></a>
             </li>
-
+            <li class="nav-item">
+                <a class="nav-link" href="miscontactos.php">
+                    <i class="fas fa-users"></i>
+                    <span>Mis contactos</span></a>
+            </li>
             <!-- Nav Item - Tables -->
             <li class="nav-item ">
                 <a class="nav-link" href="contactos.php">
-                    <i class="fas fa-fw fa-user-friends"></i>
+                    <i class="fas fa-fw fa-search"></i>
                     <span>Buscar contactos</span></a>
             </li>
 
@@ -185,7 +189,7 @@ if (empty($idproyecto2)) {
             <div class="sidebar-card d-none d-lg-flex">
                 <img class="sidebar-card-illustration mb-2" src="img/undraw_rocket.svg" alt="...">
                 <p class="text-center mb-2"><strong>ConstruPro Premium</strong> está repleto de características premium, componentes y mucho más.</p>
-                <a class="btn btn-success btn-sm" href="#">Hazte Premium</a>
+                <a class="btn btn-success btn-sm" href="haztepremium.php">Hazte Premium</a>
             </div>
         </ul>
         <!-- End of Sidebar -->

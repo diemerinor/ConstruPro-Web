@@ -19,7 +19,7 @@ if (!isset($_SESSION['loggeado'])) {
     $idusuario = $_SESSION['loggeado'];
     $inicio = "si";
 }
-$idreporte = $_GET['idreporte'];
+$idreporte = $_GET['idcargo'];
 $idproyecto = $_GET['idproyecto'];
 if (empty($idreporte)) {
     header('Location: index.php');
@@ -59,6 +59,28 @@ $nombreunidad = [];
 
 
 $cantidadseccion;
+
+
+$sql = "SELECT * from cargoproyecto cp, permisocargo pc, gestionproyecto gp, proyecto pr where 
+                                            cp.idcargo = pc.idcargo and
+                                            gp.idgestion = pc.idgestion and
+                                            cp.idproyecto= pr.idproyecto and
+                                            pc.idcargo = " . $idreporte . " and pr.idproyecto=" . $idproyecto;
+$resultados = $conexion->query($sql);
+$idcargo = [];
+$index = 0;
+while ($consultausuario = mysqli_fetch_array($resultados)) {
+    $idcargo[0] = $consultausuario["idcargo"];
+    $descripcioncargo[0] = $consultausuario["descripcioncargo"];
+    $idgestion[0] = $consultausuario["nombregestion"];
+    $nombrecargo[0] = $consultausuario["nombrecargo"];
+    if ($index == 0) $gestiona[0] = $consultausuario["permiso"];
+    if ($index == 1) $gestionf[0] = $consultausuario["permiso"];
+    if ($index == 2) $gestionr[0] = $consultausuario["permiso"];
+    if ($index == 3) $gestionm[0] = $consultausuario["permiso"];
+    $index++;
+}
+
 
 
 
@@ -134,7 +156,7 @@ for ($i = 0; $i < $cantidadavances; $i++) {
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item active">
+            <li class="nav-item ">
                 <a class="nav-link" href="charts.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Avances</span></a>
@@ -162,8 +184,7 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                     <i class="fas fa-fw fa-file"></i>
                     <span>Archivos</span></a>
             </li>
-
-            <li class="nav-item ">
+            <li class="nav-item active">
                 <a class="nav-link" href="cargos.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-sitemap"></i>
                     <span>Cargos</span></a>
@@ -277,7 +298,7 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                         }
 
                         ?>
-                       
+
                         <div class="topbar-divider d-none d-sm-block"></div>
 
                         <!-- Nav Item - User Information -->
@@ -333,68 +354,79 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                                     <h6 class="m-0 font-weight-bold text-primary">Últimos avances</h6>
                                 </div>
                                 <div class="card-body">
-                                    <form action="editaravance.php?idreporte=<?php echo $idreporte ?>&idproyecto=<?php echo $idproyecto ?>" method="post" enctype="multipart/form-data">
-                                        <?php
-                                        $sql = "SELECT se.idseccion,se.nombreseccion FROM secciones se, proyecto pr where se.idproyecto=pr.idproyecto and pr.idproyecto=" . $idproyecto;
-                                        $resultados = $conexion->query($sql);
+                                    <form action="editarcargos.php?idcargo=<?php echo $idreporte ?>&idproyecto=<?php echo $idproyecto ?>" method="post" enctype="multipart/form-data">
 
-                                        $consultaidseccion = $conexion->query("SELECT idseccion from secciones WHERE idseccion=" . $idseccion);
-                                        $tipop = mysqli_fetch_array($consultaidseccion);
-                                        $tipop = $tipop[0];
-
-                                        echo ' <div class="form-group"> Sección(*): <select style="margin-bottom:30px" name="seccion" id="tipo" class="form-control">';
-                                        while ($row = mysqli_fetch_array($resultados)) {
-                                            if ($tipop == $row["idseccion"]) {
-                                                echo '<option selected="true" value="' . $idseccion . '">' . $row["nombreseccion"] . '</option>';
-                                            } else {
-                                                echo '<option value="' . $row["idseccion"] . '">' . $row["nombreseccion"] . '</option>';
-                                            }
-                                        }
-                                        echo '</select> </div>';
-                                        ?>
 
                                         <div class="form-group">
-                                            <label for="exampleFormControlTextarea1">Ingrese descripción (*):</label>
-                                            <textarea id="descripcion2" name="descripcion2" style="height:100px; resize:none;" class="form-control" id="exampleFormControlTextarea1" rows="3"><?php echo $descripcionavance ?></textarea>
+                                            <label for="exampleFormControlInput1">Nombre cargo (*)</label>
+                                            <input type="text" name="nombrecargo" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: Director ejecutivo" value="<?php echo $nombrecargo[0] ?>">
                                         </div>
                                         <div class="form-group">
-                                            <label for="exampleFormControlInput1">Cantidad (*)</label>
-                                            <input type="text" name="cantidad" maxlength="7" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: 10000" value="<?php echo $metrosavanzados ?>">
+                                            <label for="exampleFormControlTextarea1">Descripción cargo (*):</label>
+                                            <textarea id="descripcion2" name="descripcion2" style="height:100px; resize:none;" class="form-control" id="exampleFormControlTextarea1"><?php echo $descripcioncargo[0] ?>
+                                            </textarea>
                                         </div>
-
                                         <div class="form-group">
-                                            <label for="exampleFormControlInput1">Fecha reporte(*):</label>
-                                            <input type="date" class="form-control mb-3" name="fechareporte" value="<?php echo $fechareporte ?>">
-                                        </div>
+                                            <label for="exampleFormControlInput1">Permisos(*)</label>
 
+                                            <div class="form-check">
+                                                <input class="form-check-input" name="gestionavance" <?php if ($gestiona[0]) echo "checked=checked" ?> type="checkbox" id="defaultCheck1">
+                                                <label class="form-check-label" for="defaultCheck1">
+                                                    Gestión de avance
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" name="gestionfinanciera" <?php if ($gestionf[0]) echo "checked=checked" ?> type="checkbox" id="defaultCheck1">
+                                                <label class="form-check-label" for="defaultCheck1">
+                                                    Gestión financiera
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" name="gestionrrhh" <?php if ($gestionr[0]) echo "checked=checked" ?> type="checkbox" id="defaultCheck1">
+                                                <label class="form-check-label" for="defaultCheck1">
+                                                    Gestión de RRHH
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" name="gestionmateriales" <?php if ($gestionm[0]) echo "checked=checked" ?> type="checkbox" id="defaultCheck1">
+                                                <label class="form-check-label" for="defaultCheck1">
+                                                    Gestión de materiales
+                                                </label>
+                                            </div>
+
+                                        </div>
                                         <div class="form-group">
-                                            <input style="margin-top:30px; color:white;" class="btn-primary" type="submit" name="editaravance" value="Editar">
+                                            <input style="margin-top:30px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" type="submit" name="ingresaravance" value="Registrar">
                                         </div>
-
                                     </form>
 
                                     <?php
-                                    if (isset($_POST['editaravance'])) {
-                                        $seccion = $_POST['seccion'];
-                                        $descr = $_POST['descripcion2'];
-                                        $descr = trim($descr); //la funcion trim borra los espacios de al principio y al final
-                                        $descr = htmlspecialchars($descr);
-                                        $descr = stripslashes($descr);
-                                        $cantidad = $_POST['cantidad'];
-                                        $fecha = $_POST['fechareporte'];
+                                    if (isset($_POST['ingresaravance'])) {
+                                        $nombrec = $_POST['nombrecargo'];
+                                        $descripcionc = $_POST['descripcion2'];
+                                        
+                                        $gestiona = $_POST['gestionavance'];
+                                        $gestionf = $_POST['gestionfinanciera'];
+                                        $gestionr = $_POST['gestionrrhh'];
+                                        $gestionm = $_POST['gestionmateriales'];
 
-                                        if (!$descr) {
-                                            $errores .= 'Ingrese todos los campos obligatorios';
-                                        } else {
-                                            $consultausuario = $conexion->query("UPDATE reporteavance SET idseccion='" . $seccion . "' where idreporteavance=" . $idreporte);
-                                            $consultausuario = $conexion->query("UPDATE reporteavance SET metrosavanzados='" . $cantidad . "' where idreporteavance=" . $idreporte);
-                                            $consultausuario = $conexion->query("UPDATE reporteavance SET fechareporte='" . $fecha . "' where idreporteavance=" . $idreporte);
+                                        ($gestiona == 'on') ? $ga = 1 : $ga = 0;
+                                        ($gestionf == 'on') ? $gf = 1 : $gf = 0;
+                                        ($gestionr == 'on') ? $gr = 1 : $gr = 0;
+                                        ($gestionm == 'on') ? $gm = 1 : $gm = 0;
 
-                                            $consultausuario = $conexion->query("UPDATE reporteavance SET descripcionavance='" . $descr . "' where idreporteavance=" . $idreporte);
-                                        }
+
+                                        $consultausuario = $conexion->query("UPDATE cargoproyecto SET nombrecargo='" . $nombrec . "' where idcargo=" . $idreporte);
+                                        $consultausuario = $conexion->query("UPDATE cargoproyecto SET descripcioncargo='" . $descripcionc . "' where idcargo=" . $idreporte);
+                                        $consultausuario = $conexion->query("UPDATE permisocargo SET permiso='" . $ga . "' where idcargo=" . $idreporte . " and idgestion=1");
+                                        $consultausuario = $conexion->query("UPDATE permisocargo SET permiso='" . $gf . "' where idcargo=" . $idreporte . " and idgestion=2");
+                                        $consultausuario = $conexion->query("UPDATE permisocargo SET permiso='" . $gr . "' where idcargo=" . $idreporte . " and idgestion=3");
+                                        $consultausuario = $conexion->query("UPDATE permisocargo SET permiso='" . $gm . "' where idcargo=" . $idreporte . " and idgestion=4");
+
+
                                     ?>
                                         <script>
-                                            window.location.replace("charts.php?idproyecto=<?php echo $idproyecto ?>");
+                                            window.location.replace("editarcargos.php?idcargo=<?php echo $idreporte ?>&idproyecto=<?php echo $idproyecto ?>");
                                         </script>
                                     <?php
                                         if (!$errores) {

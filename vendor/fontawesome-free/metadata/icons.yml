@@ -20215,7 +20215,7 @@ user-edit:
     - solid
   unicode: f4ff
   voted: false
-user-friends:
+search:
   changes:
     - 5.0.11
   label: User Friends

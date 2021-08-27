@@ -33,13 +33,26 @@ while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $nombreusuario = $consultausuario["nombreusuario"];
     $apellidos = $consultausuario["apellidos"];
 }
-$consultaavance = $conexion->query("SELECT * from usuario us, proyecto pr, participa pa where
+$consultaavance = $conexion->query("SELECT * from usuario us, proyecto pr, participa pa, cargoproyecto cp where
+    cp.idcargo = pa.idcargo and
     pa.idproyecto= pr.idproyecto and pa.idusuario = us.idusuario and
     pr.idproyecto =" . $idproyecto . " and
     us.idusuario=" . $idusuario);
 while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $idproyecto2 = $consultausuario["idproyecto"];
-    $rol = $consultausuario["codigorol"];
+    $idcargo = $consultausuario["idcargo"];
+}
+
+$consultaavance = $conexion->query("SELECT cp.nombrecargo, gp.nombregestion, pc.permiso from cargoproyecto cp, gestionproyecto gp, permisocargo pc where
+    cp.idcargo = pc.idcargo and
+    pc.idgestion = gp.idgestion and
+    pc.idcargo=".$idcargo);
+while ($consultausuario = mysqli_fetch_array($consultaavance)) {
+    $result[]=$consultausuario;
+    $nombrecargo[] = $consultausuario["nombrecargo"];
+    $nombregestion[]=$consultausuario["nombregestion"];
+    //$idgestion[] = $consultausuario["idgestion"];
+    $permiso[] = $consultausuario["permiso"];
 }
 if (empty($idproyecto2)) {
     header('Location: index.php');
@@ -155,32 +168,62 @@ for ($i = 0; $i < $cantidadmov; $i++) {
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
+            <?php
+                if($permiso[0]==1){
+                
+            ?>
             <li class="nav-item">
                 <a class="nav-link" href="charts.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Avances</span></a>
-            </li>
+            </li><?php
+                }
+                if($permiso[1]==1){
+
+            ?>
 
             <!-- Nav Item - Utilities Collapse Menu -->
             <li class="nav-item active">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="finanzas.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-dollar-sign"></i>
                     <span>Finanzas</span></a>
             </li>
+            <?php
+                }
+                if($permiso[3]==1){
+
+            ?>
+
             <li class="nav-item">
                 <a class="nav-link" href="materiales.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-wrench"></i>
                     <span>Materiales</span></a>
             </li>
+            <?php
+                }
+                if($permiso[2]==1){
+
+            ?>
+
             <li class="nav-item">
                 <a class="nav-link" href="participantes.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-users"></i>
                     <span>Participantes</span></a>
             </li>
+            <?php
+                }
+
+            ?>
             <li class="nav-item">
                 <a class="nav-link" href="archivos.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-file"></i>
                     <span>Archivos</span></a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="cargos.php?idproyecto=<?php print_r($idproyecto) ?>">
+                    <i class="fas fa-fw fa-sitemap"></i>
+                    <span>Cargos</span></a>
             </li>
 
             <!-- Divider -->
@@ -199,13 +242,19 @@ for ($i = 0; $i < $cantidadmov; $i++) {
                     <i class="fas fa-fw fa-user"></i>
                     <span>Cuenta</span></a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="miscontactos.php">
+                    <i class="fas fa-users"></i>
+                    <span>Mis contactos</span></a>
+            </li>
 
             <!-- Nav Item - Tables -->
             <li class="nav-item ">
                 <a class="nav-link" href="contactos.php">
-                    <i class="fas fa-fw fa-user-friends"></i>
+                    <i class="fas fa-fw fa-search"></i>
                     <span>Buscar contactos</span></a>
             </li>
+
 
 
             <!-- Divider -->
@@ -219,7 +268,7 @@ for ($i = 0; $i < $cantidadmov; $i++) {
             <div class="sidebar-card d-none d-lg-flex">
                 <img class="sidebar-card-illustration mb-2" src="img/undraw_rocket.svg" alt="...">
                 <p class="text-center mb-2"><strong>ConstruPro Premium</strong> está repleto de características premium, componentes y mucho más.</p>
-                <a class="btn btn-success btn-sm" href="#">Hazte Premium</a>
+                <a class="btn btn-success btn-sm" href="haztepremium.php">Hazte Premium</a>
             </div>
         </ul>
         <!-- End of Sidebar -->
@@ -461,14 +510,14 @@ for ($i = 0; $i < $cantidadmov; $i++) {
                                 </div>
                                 <div class="card shadow mb-4">
                                     <div class="card-body">
-                                        <div style="overflow-x:hidden;" class="table-responsive">
+                                        <div  class="table-responsive">
                                             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                                 <thead>
                                                     <tr>
                                                         <th>Fecha</th>
                                                         <th>Motivo</th>
                                                         <th>Valor</th>
-                                                        <?php if ($rol == 1) { ?><th>Acciones</th> <?php } ?>
+                                                        <?php if ($permiso[1] == 1) { ?><th>Acciones</th> <?php } ?>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -486,7 +535,7 @@ for ($i = 0; $i < $cantidadmov; $i++) {
                                                                                         } else { ?></td>
                                                                 <td class="text-danger"><?php echo '-$' . $movimiento[$i] * (-1);
                                                                                         } ?></td>
-                                                                <?php if ($rol == 1) { ?><td><a href="editarfinanzas.php?idnotificacion=<?php echo $idnotificaciones[$i]?>&idproyecto=<?php echo$idproyecto?>"  class="btn btn-success mt-2">
+                                                                <?php if ($permiso[1]==1) { ?><td><a href="editarfinanzas.php?idnotificacion=<?php echo $idnotificaciones[$i]?>&idproyecto=<?php echo$idproyecto?>"  class="btn btn-success mt-2">
                                                                             <i class="fas fa-edit"></i></a>
 
                                                                         <input class="btn btn-danger mt-2" onclick="eliminar(<?php echo $idnotificaciones[$i] ?>,<?php echo $idproyecto ?>)" type="button" value="Eliminar">

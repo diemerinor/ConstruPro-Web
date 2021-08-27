@@ -2177,7 +2177,7 @@ social:
     - thumbtack
     - user
     - user-circle
-    - user-friends
+    - search
     - user-plus
     - users
     - video
@@ -2449,7 +2449,7 @@ users-people:
     - user-clock
     - user-cog
     - user-edit
-    - user-friends
+    - search
     - user-graduate
     - user-injured
     - user-lock

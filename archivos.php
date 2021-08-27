@@ -28,36 +28,51 @@ while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $apellidos = $consultausuario["apellidos"];
 }
 
-$consultaavance = $conexion->query("SELECT * from usuario us, proyecto pr, participa pa where
+$consultaavance = $conexion->query("SELECT * from usuario us, proyecto pr, participa pa, cargoproyecto cp where
+    cp.idcargo = pa.idcargo and
     pa.idproyecto= pr.idproyecto and pa.idusuario = us.idusuario and
-    pr.idproyecto =".$idproyecto." and
-    us.idusuario=".$idusuario);
+    pr.idproyecto =" . $idproyecto . " and
+    us.idusuario=" . $idusuario);
 while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $idproyecto2 = $consultausuario["idproyecto"];
+    $idcargo = $consultausuario["idcargo"];
 }
-if (empty($idproyecto2)) {
+
+$consultaavance = $conexion->query("SELECT cp.nombrecargo, gp.nombregestion, pc.permiso from cargoproyecto cp, gestionproyecto gp, permisocargo pc where
+    cp.idcargo = pc.idcargo and
+    pc.idgestion = gp.idgestion and
+    pc.idcargo=" . $idcargo);
+while ($consultausuario = mysqli_fetch_array($consultaavance)) {
+    $result[] = $consultausuario;
+    $nombrecargo[] = $consultausuario["nombrecargo"];
+    $nombregestion[] = $consultausuario["nombregestion"];
+    //$idgestion[] = $consultausuario["idgestion"];
+    $permiso[] = $consultausuario["permiso"];
+}
+if (empty($idproyecto)) {
     header('Location: index.php');
 }
 
 
-$consultamateriales = $conexion->query("SELECT * FROM proyecto pr, usuario us, participa pa, rol ro
-where ro.CodigoRol = pa.codigorol and pr.idproyecto= pa.idproyecto and us.idusuario = pa.idusuario and pr.idproyecto=".$idproyecto);
-    while ($consultausuario = mysqli_fetch_array($consultamateriales)) {
-        $nombreparticipante[] = $consultausuario["nombreusuario"].' '.$consultausuario["apellidos"];
-        $nombrerol[] = $consultausuario["NombreRol"];
-        $nombreproyecto[0] = $consultausuario["nombreproyecto"];
-    }
-    $cantidadparticipantes = sizeof($nombreparticipante); 
-$nombrearchivo = [];
- //CONSULTA ARCHIVOS
-$consultaavance = $conexion->query("SELECT * from proyecto pr, archivos ar where pr.idproyecto = ar.idproyecto and pr.idproyecto=".$idproyecto);
-while ($consultausuario = mysqli_fetch_array($consultaavance)) {
-$rutaarchivo[] = $consultausuario["rutaarchivo"];
-$nombrearchivo[] = $consultausuario["nombrearchivo"];
+$consultamateriales = $conexion->query("SELECT * FROM proyecto pr, usuario us, participa pa
+where pr.idproyecto= pa.idproyecto and us.idusuario = pa.idusuario and pr.idproyecto=" . $idproyecto);
+while ($consultausuario = mysqli_fetch_array($consultamateriales)) {
+    $nombreparticipante[] = $consultausuario["nombreusuario"] . ' ' . $consultausuario["apellidos"];
+    $nombreproyecto[0] = $consultausuario["nombreproyecto"];
 }
-if($nombrearchivo != null){   
-$cantidadarchivos = sizeof($nombrearchivo); }
- ?>
+$cantidadparticipantes = sizeof($nombreparticipante);
+$nombrearchivo = [];
+//CONSULTA ARCHIVOS
+$consultaavance = $conexion->query("SELECT * from proyecto pr, archivos ar where pr.idproyecto = ar.idproyecto and pr.idproyecto=" . $idproyecto);
+while ($consultausuario = mysqli_fetch_array($consultaavance)) {
+    $idarchivo[] = $consultausuario["idarchivo"];
+    $rutaarchivo[] = $consultausuario["rutaarchivo"];
+    $nombrearchivo[] = $consultausuario["nombrearchivo"];
+}
+if ($nombrearchivo != null) {
+    $cantidadarchivos = sizeof($nombrearchivo);
+}
+?>
 
 <head>
 
@@ -89,7 +104,7 @@ $cantidadarchivos = sizeof($nombrearchivo); }
 
             <!-- Sidebar - Brand -->
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
-            <img style="width:30%" class="sidebar-card-illustration mb-2" src="img/LOGOblanco.png" alt="...">
+                <img style="width:30%" class="sidebar-card-illustration mb-2" src="img/LOGOblanco.png" alt="...">
                 <div class="sidebar-brand-text mx-3">Construpro</sup></div>
             </a>
 
@@ -112,44 +127,72 @@ $cantidadarchivos = sizeof($nombrearchivo); }
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item ">
-                <a class="nav-link" href="charts.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-chart-area"></i>
-                    <span>Avances</span></a>
-            </li>
+            <?php
+            if ($permiso[0] == 1) {
 
-            <!-- Nav Item - Utilities Collapse Menu -->
-            <li class="nav-item">
-                <a class="nav-link" href="finanzas.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-dollar-sign"></i>
-                    <span>Finanzas</span></a>
-            </li>
-            
-            <li class="nav-item ">
-                <a class="nav-link" href="materiales.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-wrench"></i>
-                    <span>Materiales</span></a>
-            </li>
-            <li class="nav-item ">
-                <a class="nav-link" href="participantes.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-users"></i>
-                    <span>Participantes</span></a>
-            </li>
+            ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="charts.php?idproyecto=<?php print_r($idproyecto) ?>">
+                        <i class="fas fa-fw fa-chart-area"></i>
+                        <span>Avances</span></a>
+                </li><?php
+                    }
+                    if ($permiso[1] == 1) {
+
+                        ?>
+
+                <!-- Nav Item - Utilities Collapse Menu -->
+                <li class="nav-item">
+                    <a class="nav-link" href="finanzas.php?idproyecto=<?php print_r($idproyecto) ?>">
+                        <i class="fas fa-fw fa-dollar-sign"></i>
+                        <span>Finanzas</span></a>
+                </li>
+            <?php
+                    }
+                    if ($permiso[3] == 1) {
+
+            ?>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="materiales.php?idproyecto=<?php print_r($idproyecto) ?>">
+                        <i class="fas fa-fw fa-wrench"></i>
+                        <span>Materiales</span></a>
+                </li>
+            <?php
+                    }
+                    if ($permiso[2] == 1) {
+
+            ?>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="participantes.php?idproyecto=<?php print_r($idproyecto) ?>">
+                        <i class="fas fa-fw fa-users"></i>
+                        <span>Participantes</span></a>
+                </li>
+            <?php
+                    }
+
+            ?>
             <li class="nav-item active">
                 <a class="nav-link" href="archivos.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-file"></i>
                     <span>Archivos</span></a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="cargos.php?idproyecto=<?php print_r($idproyecto) ?>">
+                    <i class="fas fa-fw fa-sitemap"></i>
+                    <span>Cargos</span></a>
+            </li>
             <!-- Divider -->
             <hr class="sidebar-divider">
 
-             <!-- Heading -->
-             <div class="sidebar-heading">
+            <!-- Heading -->
+            <div class="sidebar-heading">
                 Cuenta
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-           
+
 
             <!-- Nav Item - Charts -->
             <li class="nav-item">
@@ -157,11 +200,16 @@ $cantidadarchivos = sizeof($nombrearchivo); }
                     <i class="fas fa-fw fa-user"></i>
                     <span>Cuenta</span></a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="miscontactos.php">
+                    <i class="fas fa-users"></i>
+                    <span>Mis contactos</span></a>
+            </li>
 
             <!-- Nav Item - Tables -->
             <li class="nav-item ">
                 <a class="nav-link" href="contactos.php">
-                    <i class="fas fa-fw fa-user-friends"></i>
+                    <i class="fas fa-fw fa-search"></i>
                     <span>Buscar contactos</span></a>
             </li>
 
@@ -176,7 +224,7 @@ $cantidadarchivos = sizeof($nombrearchivo); }
             <div class="sidebar-card d-none d-lg-flex">
                 <img class="sidebar-card-illustration mb-2" src="img/undraw_rocket.svg" alt="...">
                 <p class="text-center mb-2"><strong>ConstruPro Premium</strong> está repleto de características premium, componentes y mucho más.</p>
-                <a class="btn btn-success btn-sm" href="#">Hazte Premium</a>
+                <a class="btn btn-success btn-sm" href="haztepremium.php">Hazte Premium</a>
             </div>
 
         </ul>
@@ -200,7 +248,7 @@ $cantidadarchivos = sizeof($nombrearchivo); }
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
-                    <?php
+                        <?php
                         $cantidadsolicitudes = 0;
                         $idusuario1 = [];
                         $nombresolicitante = [];
@@ -340,47 +388,23 @@ $cantidadarchivos = sizeof($nombrearchivo); }
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class=modal-header>
-                                    <h5 id="tituloavance">Crear reporte de avance</h5>
+                                    <h5 id="tituloavance">Subir archivo</h5>
                                     <button type="button" class="fa fa-times" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div>
-                                        <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post" enctype="multipart/form-data">
+                                        <form action="archivos.php?idproyecto=<?php print_r($idproyecto) ?>" method="post" enctype="multipart/form-data">
                                             <div class="form-group">
-                                                <label for="exampleFormControlInput1">Título reporte (*)</label>
-                                                <input type="text" name="nombre" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: Instalación de cerámicas">
+                                                <label for="exampleFormControlInput1">Título archivo(*)</label>
+                                                <input type="text" name="nombre" class="form-control" id="exampleFormControlInput1">
                                             </div>
                                             <div class="form-group">
-                                                <label for="exampleFormControlInput1">Cantidad (*)</label>
-                                                <input type="text" onkeypress="return solonumeros(event)" name="precio" maxlength="7" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: 10000">
-                                            </div>
-                                            <?php
-
-                                            $sql = "SELECT idunidaddemedida, nombreunidad FROM unidaddemedida";
-                                            $resultados = $conexion->query($sql);
-                                            echo 'Unidad de medida(*): <select style="margin-bottom:30px" name="tipop" id="tipo" class="form-control">';
-                                            echo '<option>Seleccione unidad de medida... </option>';
-                                            while ($row = mysqli_fetch_array($resultados)) {
-                                                if ($tipop == $row["nombreunidad"]) {
-                                                    echo '<option selected="true" value="' . $row["idunidaddemedida"] . '">' . $row["nombreunidad"] . '</option>';
-                                                } else {
-                                                    echo '<option value="' . $row["idunidaddemedida"] . '">' . $row["nombreunidad"] . '</option>';
-                                                }
-                                            }
-                                            echo '</select>';
-                                            ?>
-
-
-
-                                            <div class="form-group">
-                                                <label for="exampleFormControlFile1">Adjunte archivo (*)</label>
+                                                <label for="exampleFormControlFile1">Ingrese archivo (*):</label>
                                                 <input name="fichero" class="fichero" type="file" class="form-control-file" id="exampleFormControlFile1">
                                             </div>
 
                                             <div class="form-group">
-                                                <a href="#" type="submit" name="ingresar" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                                                    <i class="fas fa-download fa-sm text-white-50"></i> Registrar reporte</a>
-
+                                                <input style="color:white;" class="btn-primary" type="submit" name="ingresar" value="Ingresar">
                                             </div>
                                         </form>
                                     </div>
@@ -389,40 +413,85 @@ $cantidadarchivos = sizeof($nombrearchivo); }
                         </div>
                     </div>
 
+                    <?php
+                    if (isset($_POST['ingresar'])) {
+                        $nombrearchivo = $_POST['nombre'];
+                        if (is_uploaded_file($_FILES['fichero']['tmp_name'])) {
+                            //SE CREAN LAS VARIABLES PARA SUBIR A LA BASE DE DATOS
+                            $ruta = "files/";
+                            $ruta2 = "files/";
+                            $nombrefinal = trim($_FILES['fichero']['name']);
+                            $destino = "files/" . $nombrefinal;
+                            $upload = $ruta . $nombrefinal;
+                            $upload2 = $ruta2 . $nombrefinal;
+
+                            if (move_uploaded_file($_FILES['fichero']['tmp_name'], $upload2)) {
+                                $sql = "INSERT INTO archivos VALUES (null," . $idproyecto . ",'" . $destino . "','" . $nombrearchivo . "')";
+                                $result = $conexion->query($sql);
+                            }
+                        }
+                    ?>
+                        <script>
+                            window.location.replace("archivos.php?idproyecto=<?php print_r($idproyecto) ?>");
+                        </script>
+                    <?php
+
+
+                    }
+                    ?>
+
                     <div class="container-fluid">
 
-                  
 
-                    <!-- DataTales Example -->
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary"></h6>
-                        </div>
-                        <div class="card-body">
-                            <div style="overflow-x:hidden;" class="table-responsive">
-                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th>Nombre archivo</th>
-                                            <th>Acción</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php 
-                                        if($nombrearchivo!=null){for($i=0;$i<$cantidadarchivos;$i++){?>
-                                        <tr>
-                                            <td><?php echo $nombrearchivo[$i]?></td>
-                                            <td><a href="<?php print_r($rutaarchivo[$i]) ?>"download="<?php echo $nombrearchivo[$i]?>"class="btn btn-success mt-2">Ver</a>
-                                            <a href="<?php print_r($rutaarchivo[$i]) ?>"download="<?php echo $nombrearchivo[$i]?>"class="btn btn-danger mt-2">Eliminar</a></td>
-                                        </tr>
-                                        <?php }}?>
-                                    </tbody>
-                                </table>
+
+                        <!-- DataTales Example -->
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary"></h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th>Nombre archivo</th>
+                                                <th>Acción</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            if ($nombrearchivo != null) {
+                                                for ($i = 0; $i < $cantidadarchivos; $i++) { ?>
+                                                    <tr>
+                                                        <td><?php echo $nombrearchivo[$i] ?></td>
+                                                        <td><a href="<?php print_r($rutaarchivo[$i]) ?>" download="<?php echo $nombrearchivo[$i] ?>" class="btn btn-success mt-2">Ver</a>
+                                                            <input class="btn btn-danger mt-2" onclick="eliminar(<?php echo $idarchivo[$i] ?>,<?php echo $idproyecto ?>)" type="button" value="Eliminar">
+                                                            <form name="form_eliminar" id="form_eliminar" method="post" href="eliminararchivo.php>">
+                                                                <input type="hidden" name="idavance" value="<?php echo $idarchivo[$i] ?> ">
+                                                                <br>
+                                                                <br>
+                                                            </form>
+                                                        </td>
+
+                                                        <script type="text/javascript">
+                                                            function eliminar(idreporte, idproyecto) {
+                                                                if (confirm("¿Estás seguro de eliminar este archivo?")) {
+                                                                    window.location.replace("eliminararchivo.php?idavance=" + idreporte + "&idproyecto=" + idproyecto);
+                                                                } else {
+                                                                    return
+                                                                };
+                                                            }
+                                                        </script>
+                                                    </tr>
+                                            <?php }
+                                            } ?>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                </div>
+                    </div>
                 </div>
                 <!-- /.container-fluid -->
 
@@ -433,7 +502,7 @@ $cantidadarchivos = sizeof($nombrearchivo); }
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                    <span>Construpro &copy; </span>
+                        <span>Construpro &copy; </span>
                     </div>
                 </div>
             </footer>
@@ -481,7 +550,7 @@ $cantidadarchivos = sizeof($nombrearchivo); }
 
     <!-- Page level plugins -->
     <script src="vendor/chart.js/Chart.min.js"></script>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 
     <!-- Page level custom scripts -->

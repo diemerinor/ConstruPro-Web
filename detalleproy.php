@@ -33,16 +33,35 @@ while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $nombreusuario = $consultausuario["nombreusuario"];
     $apellidos = $consultausuario["apellidos"];
 }
-$consultaavance = $conexion->query("SELECT * from usuario us, proyecto pr, participa pa where
+$consultaavance = $conexion->query("SELECT * from usuario us, proyecto pr, participa pa, cargoproyecto cp where
+    cp.idcargo = pa.idcargo and
     pa.idproyecto= pr.idproyecto and pa.idusuario = us.idusuario and
     pr.idproyecto =" . $idproyecto . " and
     us.idusuario=" . $idusuario);
 while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $idproyecto2 = $consultausuario["idproyecto"];
+    $idcargo = $consultausuario["idcargo"];
 }
+$consultaavance = $conexion->query("SELECT cp.nombrecargo, gp.nombregestion, pc.permiso from cargoproyecto cp, gestionproyecto gp, permisocargo pc where
+    cp.idcargo = pc.idcargo and
+    pc.idgestion = gp.idgestion and
+    pc.idcargo=".$idcargo);
+while ($consultausuario = mysqli_fetch_array($consultaavance)) {
+    $result[]=$consultausuario;
+    $nombrecargo[] = $consultausuario["nombrecargo"];
+    $nombregestion[]=$consultausuario["nombregestion"];
+    //$idgestion[] = $consultausuario["idgestion"];
+    $permiso[] = $consultausuario["permiso"];
+}
+//echo json_encode($result);
+//echo sizeof($result);
+
 if (empty($idproyecto2)) {
     header('Location: index.php');
 }
+
+
+
 $nombreunidad = [];
 
 
@@ -197,11 +216,19 @@ if ($gasto == null) {
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
+            <?php
+                if($permiso[0]==1){
+                
+            ?>
             <li class="nav-item">
                 <a class="nav-link" href="charts.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Avances</span></a>
-            </li>
+            </li><?php
+                }
+                if($permiso[1]==1){
+
+            ?>
 
             <!-- Nav Item - Utilities Collapse Menu -->
             <li class="nav-item">
@@ -209,23 +236,42 @@ if ($gasto == null) {
                     <i class="fas fa-fw fa-dollar-sign"></i>
                     <span>Finanzas</span></a>
             </li>
+            <?php
+                }
+                if($permiso[3]==1){
+
+            ?>
 
             <li class="nav-item">
                 <a class="nav-link" href="materiales.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-wrench"></i>
                     <span>Materiales</span></a>
             </li>
+            <?php
+                }
+                if($permiso[2]==1){
+
+            ?>
 
             <li class="nav-item">
                 <a class="nav-link" href="participantes.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-users"></i>
                     <span>Participantes</span></a>
             </li>
+            <?php
+                }
+
+            ?>
 
             <li class="nav-item">
                 <a class="nav-link" href="archivos.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-file"></i>
                     <span>Archivos</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="cargos.php?idproyecto=<?php print_r($idproyecto) ?>">
+                    <i class="fas fa-fw fa-sitemap"></i>
+                    <span>Cargos</span></a>
             </li>
 
             <!-- Divider -->
@@ -246,10 +292,15 @@ if ($gasto == null) {
                     <span>Cuenta</span></a>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link" href="miscontactos.php">
+                    <i class="fas fa-users"></i>
+                    <span>Mis contactos</span></a>
+            </li>
             <!-- Nav Item - Tables -->
             <li class="nav-item ">
                 <a class="nav-link" href="contactos.php">
-                    <i class="fas fa-fw fa-user-friends"></i>
+                    <i class="fas fa-search"></i>
                     <span>Buscar contactos</span></a>
             </li>
 
@@ -265,7 +316,7 @@ if ($gasto == null) {
             <div class="sidebar-card d-none d-lg-flex">
                 <img class="sidebar-card-illustration mb-2" src="img/undraw_rocket.svg" alt="...">
                 <p class="text-center mb-2"><strong>ConstruPro Premium</strong> está repleto de características premium, componentes y mucho más.</p>
-                <a class="btn btn-success btn-sm" href="#">Hazte Premium</a>
+                <a class="btn btn-success btn-sm" href="haztepremium.php">Hazte Premium</a>
             </div>
 
         </ul>
@@ -446,7 +497,7 @@ if ($gasto == null) {
                         </div>
 
                         <!-- Earnings (Monthly) Card Example -->
-                        <div class="col-xl-3 col-md-6 mb-4">
+                        <!-- <div class="col-xl-3 col-md-6 mb-4">
                             <div class="card border-left-info shadow h-100 py-2">
                                 <div class="card-body">
                                     <div class="row no-gutters align-items-center">
@@ -470,7 +521,7 @@ if ($gasto == null) {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
                         <!-- Pending Requests Card Example -->
                         <div class="col-xl-3 col-md-6 mb-4">
@@ -501,18 +552,7 @@ if ($gasto == null) {
                                 <!-- Card Header - Dropdown -->
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Últimos avances</h6>
-                                    <div class="dropdown no-arrow">
-                                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
-                                            <div class="dropdown-header">Dropdown Header:</div>
-                                            <a class="dropdown-item" href="#">Action</a>
-                                            <a class="dropdown-item" href="#">Another action</a>
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="#">Something else here</a>
-                                        </div>
-                                    </div>
+                                  
                                 </div>
                                 <!-- Card Body -->
                                 <div class="card-body">
@@ -534,7 +574,7 @@ if ($gasto == null) {
                                             <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
-                                            <div class="dropdown-header">Dropdown Header:</div>
+                                            <div class="dropdown-header">Acciones:</div>
 
                                             <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#infoavances2" href="#">Crear evento</a>
 

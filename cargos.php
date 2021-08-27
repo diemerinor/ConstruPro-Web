@@ -42,17 +42,16 @@ $consultaavance = $conexion->query("SELECT * from usuario us, proyecto pr, parti
     us.idusuario=" . $idusuario);
 while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $idproyecto2 = $consultausuario["idproyecto"];
-    $idcargo = $consultausuario["idcargo"];
+    $idcargousuario = $consultausuario["idcargo"];
 }
-
 $consultaavance = $conexion->query("SELECT cp.nombrecargo, gp.nombregestion, pc.permiso from cargoproyecto cp, gestionproyecto gp, permisocargo pc where
     cp.idcargo = pc.idcargo and
     pc.idgestion = gp.idgestion and
-    pc.idcargo=".$idcargo);
+    pc.idcargo=" . $idcargousuario);
 while ($consultausuario = mysqli_fetch_array($consultaavance)) {
-    $result[]=$consultausuario;
-    $nombrecargo[] = $consultausuario["nombrecargo"];
-    $nombregestion[]=$consultausuario["nombregestion"];
+    $result[] = $consultausuario;
+    $nombrecargousuario[] = $consultausuario["nombrecargo"];
+    $nombregestionusuario[] = $consultausuario["nombregestion"];
     //$idgestion[] = $consultausuario["idgestion"];
     $permiso[] = $consultausuario["permiso"];
 }
@@ -60,19 +59,20 @@ if (empty($idproyecto2)) {
     header('Location: index.php');
 }
 $nombrematerial = [];
-$consultamateriales = $conexion->query("SELECT RM.idrecursomat, RM.nombrerecurso, POR.stock,PR.nombreproyecto FROM 
-        recursosmat RM, poseerecurso POR, proyecto PR 
-		WHERE RM.idrecursomat = POR.idrecursomat AND
-		POR.idproyecto = PR.idproyecto AND
-		PR.idproyecto=" . $idproyecto);
+
+
+
+$consultamateriales = $conexion->query("SELECT * from cargoproyecto cp, proyecto pr where
+cp.idproyecto=pr.idproyecto and 
+pr.idproyecto=" . $idproyecto);
 while ($consultausuario = mysqli_fetch_array($consultamateriales)) {
-    $idmaterial[] = $consultausuario["idrecursomat"];
-    $nombrematerial[] = $consultausuario["nombrerecurso"];
-    $stockmaterial[] = $consultausuario["stock"];
+    $idcargo[] = $consultausuario["idcargo"];
+    $nombrecargo[] = $consultausuario["nombrecargo"];
+    $descripcioncargo[] = $consultausuario["descripcioncargo"];
     $nombreproyecto[0] = $consultausuario["nombreproyecto"];
 }
-if ($nombrematerial != null) {
-    $cantidadmateriales = sizeof($nombrematerial);
+if ($nombrecargo != null) {
+    $cantidadmateriales = sizeof($nombrecargo);
 }
 
 ?>
@@ -85,7 +85,7 @@ if ($nombrematerial != null) {
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Materiales</title>
+    <title>Cargos</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
     <!-- Custom fonts for this template-->
@@ -131,49 +131,49 @@ if ($nombrematerial != null) {
 
             <!-- Nav Item - Pages Collapse Menu -->
             <?php
-                if($permiso[0]==1){
-                
-            ?>
-            <li class="nav-item">
-                <a class="nav-link" href="charts.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-chart-area"></i>
-                    <span>Avances</span></a>
-            </li><?php
-                }
-                if($permiso[1]==1){
+            if ($permiso[0] == 1) {
 
             ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="charts.php?idproyecto=<?php print_r($idproyecto) ?>">
+                        <i class="fas fa-fw fa-chart-area"></i>
+                        <span>Avances</span></a>
+                </li><?php
+                    }
+                    if ($permiso[1] == 1) {
 
-            <!-- Nav Item - Utilities Collapse Menu -->
-            <li class="nav-item">
-                <a class="nav-link" href="finanzas.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-dollar-sign"></i>
-                    <span>Finanzas</span></a>
-            </li>
+                        ?>
+
+                <!-- Nav Item - Utilities Collapse Menu -->
+                <li class="nav-item">
+                    <a class="nav-link" href="finanzas.php?idproyecto=<?php print_r($idproyecto) ?>">
+                        <i class="fas fa-fw fa-dollar-sign"></i>
+                        <span>Finanzas</span></a>
+                </li>
             <?php
-                }
-                if($permiso[3]==1){
+                    }
+                    if ($permiso[3] == 1) {
 
             ?>
 
-            <li class="nav-item active">
-                <a class="nav-link" href="materiales.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-wrench"></i>
-                    <span>Materiales</span></a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="materiales.php?idproyecto=<?php print_r($idproyecto) ?>">
+                        <i class="fas fa-fw fa-wrench"></i>
+                        <span>Materiales</span></a>
+                </li>
             <?php
-                }
-                if($permiso[2]==1){
+                    }
+                    if ($permiso[2] == 1) {
 
             ?>
 
-            <li class="nav-item">
-                <a class="nav-link" href="participantes.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-users"></i>
-                    <span>Participantes</span></a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="participantes.php?idproyecto=<?php print_r($idproyecto) ?>">
+                        <i class="fas fa-fw fa-users"></i>
+                        <span>Participantes</span></a>
+                </li>
             <?php
-                }
+                    }
 
             ?>
             <li class="nav-item">
@@ -181,7 +181,7 @@ if ($nombrematerial != null) {
                     <i class="fas fa-fw fa-file"></i>
                     <span>Archivos</span></a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link" href="cargos.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-sitemap"></i>
                     <span>Cargos</span></a>
@@ -207,6 +207,7 @@ if ($nombrematerial != null) {
                     <i class="fas fa-users"></i>
                     <span>Mis contactos</span></a>
             </li>
+
             <!-- Nav Item - Tables -->
             <li class="nav-item ">
                 <a class="nav-link" href="contactos.php">
@@ -292,7 +293,7 @@ if ($nombrematerial != null) {
                                             <div class="text-truncate"><?php echo $nombresolicitante[$i]; ?></div>
                                         </div>
                                         <div class="d-flex ml-2">
-                                            <form action="materiales.php?idproyecto=<?php print_r($idproyecto) ?>" method="post" enctype="multipart/form-data">
+                                            <form action="cargos.php?idproyecto=<?php print_r($idproyecto) ?>" method="post" enctype="multipart/form-data">
                                                 <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm" type="submit" name="aceptarsolicitud" value="Aceptar">
 
                                                 <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm" type="submit" name="rechazarsolicitud" value="Eliminar">
@@ -312,11 +313,21 @@ if ($nombrematerial != null) {
                                     $consultausuario = $conexion->query("DELETE FROM solicitudamistad WHERE idsolicitudamistad=" . $solicitudid);
                                 ?>
                                     <script>
-                                        window.location.replace("materiales.php?idproyecto=<?php echo $idproyecto ?>");
+                                        window.location.replace("cargos.php?idproyecto=<?php echo $idproyecto ?>");
+                                    </script>
+                                <?php
+                                }
+                                if (isset($_POST['rechazarsolicitud'])) {
+                                    $solicitudid = $_POST['idsolicitud'];
+                                    $consultausuario = $conexion->query("DELETE FROM solicitudamistad WHERE idsolicitudamistad=" . $solicitudid);
+                                ?>
+                                    <script>
+                                        window.location.replace("cargos.php?idproyecto=<?php echo $idproyecto ?>");
                                     </script>
                                 <?php
                                 }
                                 ?>
+
 
                             </div>
                         </li>
@@ -381,51 +392,91 @@ if ($nombrematerial != null) {
 
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Materiales</h1>
+                        <h1 class="h3 mb-0 text-gray-800">Cargos</h1>
                         <a href="#" data-bs-toggle="modal" data-bs-target="#infoavances2" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                            <i class="fas fa-download fa-sm text-white-50"></i> Crear material</a>
+                            <i class="fas fa-download fa-sm text-white-50"></i> Crear cargo</a>
 
                     </div>
                     <div class="modal fade" style="margin-top:140px" id="infoavances2" tabindex="-1" role="dialog" aria-labelledby="tituloavance" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class=modal-header>
-                                    <h5 id="tituloavance">Registrar material</h5>
+                                    <h5 id="tituloavance">Registrar cargo</h5>
                                     <button type="button" class="fa fa-times" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
                                     <div>
-                                        <form action="materiales.php?idproyecto=<?php print_r($idproyecto) ?>" method="post" enctype="multipart/form-data">
+                                        <form action="cargos.php?idproyecto=<?php print_r($idproyecto) ?>" method="post" enctype="multipart/form-data">
                                             <div class="form-group">
-                                                <label for="exampleFormControlInput1">Nombre material (*)</label>
-                                                <input type="text" name="nombrematerial" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: Arena">
+                                                <label for="exampleFormControlInput1">Nombre cargo (*)</label>
+                                                <input type="text" name="nombrecargo" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: Director ejecutivo">
                                             </div>
                                             <div class="form-group">
-                                                <label for="exampleFormControlInput1">Stock(*)</label>
-                                                <input type="text" name="stock" maxlength="7" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: 10000">
+                                                <label for="exampleFormControlTextarea1">Descripción cargo (*):</label>
+                                                <textarea id="descripcion2" name="descripcion2" style="height:100px; resize:none;" class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="exampleFormControlInput1">Permisos(*)</label>
+
+                                                <div class="form-check">
+                                                    <input class="form-check-input" name="gestionavance" type="checkbox" id="defaultCheck1">
+                                                    <label class="form-check-label" for="defaultCheck1">
+                                                        Gestión de avance
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" name="gestionfinanciera" type="checkbox" id="defaultCheck1">
+                                                    <label class="form-check-label" for="defaultCheck1">
+                                                        Gestión financiera
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" name="gestionrrhh" type="checkbox" id="defaultCheck1">
+                                                    <label class="form-check-label" for="defaultCheck1">
+                                                        Gestión de RRHH
+                                                    </label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" name="gestionmateriales" type="checkbox" id="defaultCheck1">
+                                                    <label class="form-check-label" for="defaultCheck1">
+                                                        Gestión de materiales
+                                                    </label>
+                                                </div>
+
                                             </div>
                                             <div class="form-group">
                                                 <input style="margin-top:30px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" type="submit" name="ingresaravance" value="Registrar">
                                             </div>
                                         </form>
+
                                         <?php
                                         if (isset($_POST['ingresaravance'])) {
-                                            $nombrematerial = $_POST['nombrematerial'];
-                                            $stock = $_POST['stock'];
+                                            $nombrec = $_POST['nombrecargo'];
+                                            $descripcionc = $_POST['descripcion2'];
+                                            $gestiona = $_POST['gestionavance'];
+                                            $gestionf = $_POST['gestionfinanciera'];
+                                            $gestionr = $_POST['gestionrrhh'];
+                                            $gestionm = $_POST['gestionmateriales'];
 
-                                            if ($nombrematerial == '') {
-                                                $errores .= 'Ingrese todos los campos obligatorios';
-                                            } else {
-                                                $consultausuario = $conexion->query("INSERT INTO recursosmat VALUES (null,'" . $nombrematerial . "')");
 
-                                                $result3 = $conexion->query("SELECT MAX(idrecursomat) from recursosmat");
-                                                $idrecurso = mysqli_fetch_array($result3);
-                                                $idrecursomat = $idrecurso[0];
+                                            $result3 = $conexion->query("SELECT MAX(idcargo) from cargoproyecto");
+                                            $aux = mysqli_fetch_array($result3);
+                                            $idcargoproyecto = $aux[0];
+                                            $idcargoproyecto++;
+                                            $consultausuario = $conexion->query("INSERT INTO cargoproyecto VALUES ( $idcargoproyecto,'" . $nombrec . "'," . $idproyecto . ",'" . $descripcionc . "')");
 
-                                                $consultausuario = $conexion->query("INSERT INTO poseerecurso VALUES (null," . $idproyecto . "," . $idrecursomat . "," . $stock . ")");
-                                            } ?>
+                                            ($gestiona == 'on') ? $ga = 1 : $ga = 0;
+                                            ($gestionf == 'on') ? $gf = 1 : $gf = 0;
+                                            ($gestionr == 'on') ? $gr = 1 : $gr = 0;
+                                            ($gestionm == 'on') ? $gm = 1 : $gm = 0;
+
+                                            $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargoproyecto . ",1," . $ga . ")");
+                                            $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargoproyecto . ",2," . $gf . ")");
+                                            $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargoproyecto . ",3," . $gr . ")");
+                                            $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargoproyecto . ",4," . $gm . ")");
+                                        ?>
                                             <script>
-                                                window.location.replace("materiales.php?idproyecto=<?php echo $idproyecto ?>");
+                                                window.location.replace("cargos.php?idproyecto=<?php echo $idproyecto ?>");
                                             </script>
                                         <?php
                                             if (!$errores) {
@@ -446,28 +497,35 @@ if ($nombrematerial != null) {
                         <!-- DataTales Example -->
                         <div class="card shadow mb-4">
                             <div class="card-header py-3">
-                                <h6 class="m-0 font-weight-bold text-primary">Inventario</h6>
+                                <h6 class="m-0 font-weight-bold text-primary">Cargos del proyecto</h6>
                             </div>
                             <div class="card-body">
-                                <div  class="table-responsive">
+                                <div class="table-responsive">
                                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                         <thead>
                                             <tr>
-                                                <th>Nombre material</th>
-                                                <th>Stock</th>
-                                                <th>Accion</th>
+                                                <th>Nombre cargo</th>
+                                                <th>Descripción</th>
+                                                <th>Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php for ($i = 0; $i < $cantidadmateriales; $i++) { ?>
                                                 <tr>
-                                                    <form action="materiales.php?idproyecto=<?php print_r($idproyecto) ?>" method="POST">
-                                                        <input type="hidden" name="idavance" value="<?php echo $idmaterial[$i] ?> ">
-                                                        <td><?php echo $nombrematerial[$i] ?></td>
-                                                        <td><?php echo $stockmaterial[$i] ?></td>
-                                                        <td><a href="<?php print_r($rutaarchivo[$i]) ?>" download="<?php echo $nombrearchivo[$i] ?>" class="btn btn-success mt-2">
+                                                    <form action="cargos.php?idproyecto=<?php print_r($idproyecto) ?>" method="POST">
+                                                        <input type="hidden" name="idavance" value="<?php echo $idcargo[$i] ?> ">
+                                                        <td><?php echo $nombrecargo[$i] ?></td>
+                                                        <td><?php echo $descripcioncargo[$i] 
+                                                        
+                                                        ?></td>
+
+                                                        <td>
+                                                            <?php if($nombrecargo[$i]!="Administrador"){?>    
+                                                        <a href="editarcargos.php?idcargo=<?php echo $idcargo[$i] ?>&idproyecto=<?php echo $idproyecto ?>" class="btn btn-success mt-2">
                                                                 <i class="fas fa-edit"></i></a>
-                                                            <input class="btn btn-danger mt-2" onclick="eliminar(<?php echo $idmaterial[$i] ?>,<?php echo $idproyecto ?>)" type="button" value="Eliminar">
+                                                            <input class="btn btn-danger mt-2" onclick="eliminar(<?php echo $idcargo[$i] ?>,<?php echo $idproyecto ?>)" type="button" value="Eliminar">
+                                                                <?php }else{
+                                                                    echo 'No se pueden realizar cambios a este cargo';}?>
                                                         </td>
                                                     </form>
                                                 </tr>
@@ -478,8 +536,8 @@ if ($nombrematerial != null) {
 
                                             <script type="text/javascript">
                                                 function eliminar(idreporte, idproyecto) {
-                                                    if (confirm("¿Estás seguro de eliminar este material?")) {
-                                                        window.location.replace("eliminarmaterial.php?idmaterial=" + idreporte + "&idproyecto=" + idproyecto);
+                                                    if (confirm("¿Estás seguro de eliminar este cargo?")) {
+                                                        window.location.replace("eliminarcargo.php?idcargo=" + idreporte + "&idproyecto=" + idproyecto);
                                                     } else {
                                                         return
                                                     };

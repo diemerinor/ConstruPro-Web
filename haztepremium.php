@@ -101,7 +101,7 @@ for ($i = 0; $i < $cantidadavances; $i++) {
             <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item active">
+            <li class="nav-item">
                 <a class="nav-link" href="index.php">
                     <i class="fas fa-fw fa-home"></i>
                     <span>Inicio</span></a>
@@ -295,190 +295,169 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
 
-                    <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Mis proyectos</h1>
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#infoavances2" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                            <i class="fas fa-download fa-sm text-white-50"></i> Crear proyecto</a>
-
+                        <h1 class="h3 mb-0 text-gray-800">Encuentra tu plan más cómodo</h1>
                     </div>
-                    <div class="modal fade" id="infoavances2" tabindex="-1" role="dialog" aria-labelledby="tituloavance" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class=modal-header>
-                                    <h5 id="tituloavance">Crear proyecto</h5>
-                                    <button type="button" class="fa fa-times" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div>
-
-                                        <form action="index.php" method="post" enctype="multipart/form-data">
-                                            <div class="form-group">
-                                                <label for="exampleFormControlInput1">Nombre proyecto(*):</label>
-                                                <input type="text" name="nombre" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: Parque residencial">
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="exampleFormControlTextarea1">Ingrese descripción (*):</label>
-                                                <textarea id="descripcion2" name="descripcion2" style="height:140px; resize:none;" class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-lg-6">
-                                                    <label for="exampleFormControlInput1">Fecha inicio(*):</label>
-                                                    <input type="date" name="fechainicio" class=" form-control" id="exampleFormControlInput1" name="trip-start">
-                                                </div>
-                                                <br>
-                                                <div class="col-lg-6">
-                                                    <label for="exampleFormControlInput1">Fecha término(*):</label>
-                                                    <input type="date" name="fechatermino" class="form-control" id="exampleFormControlInput1" name="trip-start">
-                                                </div>
-                                            </div>
-
-                                            <br>
-                                            <div class="form-group">
-                                                <label for="exampleFormControlInput1">Capital inicial(*):</label>
-                                                <input type="text" name="capital" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: 40000">
-                                            </div>
-                                            <?php
-                                            $sql = "SELECT idcomuna, nombrecomuna FROM comuna";
-                                            $resultados = $conexion->query($sql);
-                                            echo 'Comuna(*): <select style="margin-bottom:20px" name="comuna" id="tipo" class="form-control">';
-                                            echo '<option>Seleccione comuna... </option>';
-                                            while ($row = mysqli_fetch_array($resultados)) {
-                                                echo '<option value="' . $row["idcomuna"] . '">' . $row["nombrecomuna"] . '</option>';
-                                            }
-                                            echo '</select>'
-                                            ?>
-
-
-                                            <div class="form-group">
-                                                <label for="exampleFormControlFile1">Ingrese imagen de portada (*):</label>
-                                                <input name="fichero" class="fichero" type="file" class="form-control-file" id="exampleFormControlFile1">
-                                            </div>
-
-                                            <div class="form-group">
-                                                <input style="background-color:#002018; color:white;" type="submit" name="ingresar" class="usuario" value="Ingresar" style="margin-top:30 px">
-                                            </div>
-
-                                        </form>
-
-
-                                        <?php
-                                        if (isset($_POST['ingresar'])) {
-                                            $nombreproyecto = $_POST['nombre'];
-                                            $descr = $_POST['descripcion2'];
-                                            $descr = trim($descr); //la funcion trim borra los espacios de al principio y al final
-                                            $descr = htmlspecialchars($descr);
-                                            $descr = stripslashes($descr);
-                                            $capitalinicial = $_POST['capital'];
-                                            $fechainicial = $_POST['fechainicio'];
-                                            $fechatermino = $_POST['fechatermino'];
-                                            $comuna = $_POST['comuna'];
-                                            $categoria = $_POST['categoria'];
-
-
-                                            if ($descr == '') {
-                                                $errores .= 'Ingrese todos los campos obligatorios';
-                                            } else {
-                                                if (is_uploaded_file($_FILES['fichero']['tmp_name'])) {
-                                                    //SE CREAN LAS VARIABLES PARA SUBIR A LA BASE DE DATOS
-                                                    $ruta = "img/";
-                                                    $ruta2 = "img/";
-                                                    $nombrefinal = trim($_FILES['fichero']['name']);
-                                                    $destino = "img/" . $nombrefinal;
-                                                    $upload = $ruta . $nombrefinal;
-                                                    $upload2 = $ruta2 . $nombrefinal;
-
-
-                                                    if (move_uploaded_file($_FILES['fichero']['tmp_name'], $upload2)) {
-
-                                                        $sql = "INSERT INTO proyecto VALUES (null,'" . $nombreproyecto . "',
-                            '" . $descr . "'," . $idusuario . ",'" . $destino . "',
-                            " . $comuna . ",0," . $capitalinicial . ",'" . $fechainicial . "','" . $fechatermino . "')";
-                                                        $result = $conexion->query($sql);
-                                                    }
-                                                } else {
-                                                    $sql = "INSERT INTO proyecto VALUES (null,'" . $nombreproyecto . "',
-                            '" . $descr . "'," . $idusuario . ",'img/sinfotoproyecto.jpg',
-                            " . $comuna . ",0," . $capitalinicial . ",'" . $fechainicial . "','" . $fechatermino . "')";
-                                                    $result = $conexion->query($sql);
-                                                }
-                                                $result3 = $conexion->query("SELECT MAX(idproyecto) from proyecto");
-                                                $idproyecto2 = mysqli_fetch_array($result3);
-                                                $idproyectocreado = $idproyecto2[0];
-
-
-                                                $consultausuario = $conexion->query("INSERT INTO participa VALUES (" . $idproyectocreado . "," . $idusuario . ",1)");
-                                                $consultausuario = $conexion->query("INSERT INTO secciones VALUES (null," . $idproyectocreado . ",'Principal', 'Seccion principal',0,1,1,0)");
-                                                $consultausuario = $conexion->query("INSERT INTO cargoproyecto VALUES (null,'Administrador'," . $idproyectocreado . ",'Tiene acceso total')");
-
-
-
-                                                $result3 = $conexion->query("SELECT MAX(idcargo) from cargoproyecto");
-                                                $idcargo = mysqli_fetch_array($result3);
-                                                $idcargocreado = $idcargo[0];
-
-                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",1,1)");
-                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",2,1)");
-                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",3,1)");
-                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",4,1)");
-
-                                                $fechahoy = date('Y-m-d');
-                                                $consultausuario = $conexion->query("INSERT INTO notificaciones values (null,'Inversión inicial',null," . $capitalinicial . ",'" . $fechahoy . "',null,
-		                                                                             " . $idproyectocreado . "," . $idusuario . ",1,2,'" . $fechahoy . "')");
-                                                $consultausuario = $conexion->query("INSERT INTO poseecargo VALUES (null," . $idusuario . "," . $idcargocreado . "," . $idproyectocreado . ")");
-
-                                        ?>
-                                                <script>
-                                                    window.location.replace("index.php");
-                                                </script>
-                                        <?php
-                                            }
-                                            if (!$errores) {
-                                                $enviado = 'true';
-                                            }
-                                        }
-                                        ?>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
 
                     <!-- Content Row -->
                     <div class="row">
 
                         <!-- Earnings (Monthly) Card Example -->
-                        <?php
-                        if ($cantidadproyectos > 0) {
-                            for ($i = 0; $i < $cantidadproyectos; $i++) {
-                        ?>
-                                <div class="col-xl-3 col-md-6 mb-4">
-                                    <div class="card border-left-success shadow h-100 py-2">
-                                        <div class="card-body">
-                                            <div class="row no-gutters align-items-center">
-                                                <div class="col mr-2">
-                                                    <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $nombreproyecto[$i] ?></div>
-                                                </div>
-                                                <div class="col-auto">
-                                                    <img class="card-img-top" style="border-radius: 10px; box-shadow: 3rem;" src="<?php print_r($imagen[$i]); ?>" alt="Card image cap">
-                                                </div>
-                                                <a href="detalleproy.php?idproyecto=<?php print_r($idproyectos[$i]) ?>" class="btn btn-success mt-2">Gestionar</a>
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Plan Medium</div>
+                                            <div class=" ml-2 h5 mb-0 font-weight-bold text-gray-800">
+                                                <li>
+                                                    Colabora con hasta 100 usuarios
+                                                </li>
+                                                <li>Almacenamiento limitado</li>
+                                                <button href="#" data-bs-toggle="modal" data-bs-target="#haztemedium" class="btn btn-success mt-2" type="button"> Suscribete</i></button>
 
+                                            </div>
+
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fab fa-medium-m fa-2x text-gray-300"></i>
+                                        </div>
+                                        <div class="modal fade" id="haztemedium" tabindex="-1" role="dialog" aria-labelledby="tituloavance" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class=modal-header>
+                                                        <h5 id="tituloavance">Suscripción Plan Medium</h5>
+                                                        <button type="button" class="fa fa-times" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div>
+
+                                                            <form action="index.php" method="post" enctype="multipart/form-data">
+                                                                <div class="form-group">
+                                                                    <label for="exampleFormControlInput1">Nombre(*):</label>
+                                                                    <input type="text" id="nombremedium" name="nombre" class="form-control" id="exampleFormControlInput1">
+                                                                </div>
+
+                                                                <div class="form-group">
+                                                                    <label for="exampleFormControlInput1">Correo de contacto(*):</label>
+                                                                    <input type="email" id="emailmedium" name="email" class="form-control" id="exampleFormControlInput1">
+                                                                </div>
+
+
+                                                                <div class="form-group">
+                                                                    <input style="background-color:#002018; color:white;" onclick="hazteMedium()" type="button" name="ingresar" class="usuario" value="Ingresar" style="margin-top:30 px">
+                                                                </div>
+                                                                <div hidden id="successmedium" class="alert alert-success">Felicidades, se ha notificado de tu interés por el plan Medium, serás contactado en la brevedad</div>
+                                                                <div hidden id="alertmedium" class="alert alert-danger">Por favor rellena todos los datos</div>
+                                                                <script>
+                                                                    function hazteMedium() {
+                                                                        nombre = document.getElementById("nombremedium").value;
+                                                                        email = document.getElementById("emailmedium").value;
+                                                                        if (nombre != '' && email != '') {
+                                                                            console.log("aaaa")
+                                                                            document.getElementById("successmedium").hidden = false;
+                                                                            document.getElementById("alertmedium").hidden = true;
+                                                                        } else {
+                                                                            console.log("bbb")
+                                                                            document.getElementById("alertmedium").hidden = false;
+                                                                            document.getElementById("successmedium").hidden =true;
+                                                                        }
+                                                                        console.log(nombre + " hola " + email);
+                                                                    }
+                                                                </script>
+                                                            </form>
+
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            <?php
-                            }
-                        } else {
-                            ?>
-                            <h3>Aún no tienes proyectos</h3>
-                        <?php
-                        }
-                        ?>
+                            </div>
+                        </div>
+
+                        <!-- Earnings (Monthly) Card Example -->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-danger shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Plan Premium</div>
+                                            <div class="ml-2 h5 mb-0 font-weight-bold text-gray-800">
+                                                <li>Colabora con más de 100 usuarios</li>
+                                                <li>Almacenamiento ilimitado</li>
+                                                <button href="#" data-bs-toggle="modal" data-bs-target="#haztepremium" class="btn btn-success mt-2" type="button"> Suscribete</i></button>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-crown fa-2x text-gray-300"></i>
+                                        </div>
+                                        <div class="modal fade" id="haztepremium" tabindex="-1" role="dialog" aria-labelledby="tituloavance" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class=modal-header>
+                                                        <h5 id="tituloavance">Suscripción Plan Premium</h5>
+                                                        <button type="button" class="fa fa-times" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div>
+
+                                                            <form action="index.php" method="post" enctype="multipart/form-data">
+                                                                <div class="form-group">
+                                                                    <label for="exampleFormControlInput1">Nombre(*):</label>
+                                                                    <input type="text" id="nombrepremium" name="nombre" class="form-control" id="exampleFormControlInput1">
+                                                                </div>
+
+                                                                <div class="form-group">
+                                                                    <label for="exampleFormControlInput1">Correo de contacto(*):</label>
+                                                                    <input type="email" id="emailpremium" name="email" class="form-control" id="exampleFormControlInput1">
+                                                                </div>
+
+
+                                                                <div class="form-group">
+                                                                    <input style="background-color:#002018; color:white;" onclick="haztePremium()" type="button" name="ingresar" class="usuario" value="Ingresar" style="margin-top:30 px">
+                                                                </div>
+                                                                <div hidden id="successpremium" class="alert alert-success">Felicidades, se ha notificado de tu interés por el plan premium, serás contactado en la brevedad</div>
+                                                                <div hidden id="alertpremium" class="alert alert-danger">Por favor rellena todos los datos</div>
+                                                                <script>
+                                                                    function haztePremium() {
+                                                                        nombre = document.getElementById("nombrepremium").value;
+                                                                        email = document.getElementById("emailpremium").value;
+                                                                        if (nombre != '' && email != '') {
+                                                                            console.log("aaaa")
+                                                                            document.getElementById("successpremium").hidden = false;
+                                                                            document.getElementById("alertpremium").hidden = true;
+                                                                        } else {
+                                                                            console.log("bbb")
+                                                                            document.getElementById("alertpremium").hidden = false;
+                                                                            document.getElementById("successpremium").hidden =true;
+                                                                        }
+                                                                        console.log(nombre + " hola " + email);
+                                                                    }
+                                                                </script>
+
+                                                            </form>
+
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
+
+
 
                 </div>
                 <!-- /.container-fluid -->

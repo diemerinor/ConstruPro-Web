@@ -44,24 +44,22 @@ if ($idproyectos != null) {
     $cantidadproyectos = 0;
 }
 
-?>
-<script type="text/javascript">
-    let ultimoval = [];
-    let fechas = [];
-    let sumamts = [];
-    let nombresec = [];
-    let cantidadav = "<?php echo $cantidadavances ?>"
-</script>
-<?php
-for ($i = 0; $i < $cantidadavances; $i++) {
-?>
-    <script type="text/javascript">
-        fechas.push("<?php echo $fechareporte[$i]; ?>");
-        ultimoval.push("<?php echo $metrosavanzados[$i]; ?>");
-    </script>
-<?php
+
+
+$result3 = $conexion->query("SELECT * FROM  usuario us, amistad am where (am.idusuario1 =" . $idusuario . " or am.idusuario2=" . $idusuario . ") and (am.idusuario1 = us.idusuario or am.idusuario2=us.idusuario)");
+
+while ($row = $result3->fetch_array()) {
+    if ($row["idusuario"] != $idusuario) {
+        $nombrecontactos[] = $row["nombreusuario"];
+        $apellidocontactos[] = $row["apellidos"];
+        $idusuarios[] = $row["idusuario"];
+    }
 }
+$cantidadcontactos = sizeof($nombrecontactos);
 ?>
+
+
+
 
 <head>
 
@@ -101,7 +99,7 @@ for ($i = 0; $i < $cantidadavances; $i++) {
             <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item active">
+            <li class="nav-item ">
                 <a class="nav-link" href="index.php">
                     <i class="fas fa-fw fa-home"></i>
                     <span>Inicio</span></a>
@@ -121,12 +119,14 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                     <i class="fas fa-fw fa-user"></i>
                     <span>Mi perfil</span></a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="miscontactos.php">
+
+            <!-- Nav Item - Utilities Collapse Menu -->
+            <li class="nav-item active">
+                <a class="nav-link" href="#">
                     <i class="fas fa-users"></i>
                     <span>Mis contactos</span></a>
             </li>
-            <!-- Nav Item - Utilities Collapse Menu -->
+
             <li class="nav-item">
                 <a class="nav-link" href="contactos.php">
                     <i class="fas fa-fw fa-search"></i>
@@ -184,6 +184,7 @@ for ($i = 0; $i < $cantidadavances; $i++) {
 
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
+
                         <?php
                         $cantidadsolicitudes = 0;
                         $idusuario1 = [];
@@ -227,7 +228,7 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                                             <div class="text-truncate"><?php echo $nombresolicitante[$i]; ?></div>
                                         </div>
                                         <div class="d-flex ml-2">
-                                            <form action="index.php" method="post" enctype="multipart/form-data">
+                                            <form action="contactos.php" method="post" enctype="multipart/form-data">
                                                 <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-success shadow-sm" type="submit" name="aceptarsolicitud" value="Aceptar">
 
                                                 <input style="margin-top:10px; color:white;" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm" type="submit" name="rechazarsolicitud" value="Eliminar">
@@ -247,7 +248,7 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                                     $consultausuario = $conexion->query("DELETE FROM solicitudamistad WHERE idsolicitudamistad=" . $solicitudid);
                                 ?>
                                     <script>
-                                        window.location.replace("index.php");
+                                        window.location.replace("contactos.php");
                                     </script>
                                 <?php
                                 }
@@ -255,7 +256,6 @@ for ($i = 0; $i < $cantidadavances; $i++) {
 
                             </div>
                         </li>
-
 
                         <div class="topbar-divider d-none d-sm-block"></div>
 
@@ -295,190 +295,71 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
 
-                    <!-- Page Heading -->
-                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Mis proyectos</h1>
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#infoavances2" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                            <i class="fas fa-download fa-sm text-white-50"></i> Crear proyecto</a>
-
-                    </div>
-                    <div class="modal fade" id="infoavances2" tabindex="-1" role="dialog" aria-labelledby="tituloavance" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class=modal-header>
-                                    <h5 id="tituloavance">Crear proyecto</h5>
-                                    <button type="button" class="fa fa-times" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div>
-
-                                        <form action="index.php" method="post" enctype="multipart/form-data">
-                                            <div class="form-group">
-                                                <label for="exampleFormControlInput1">Nombre proyecto(*):</label>
-                                                <input type="text" name="nombre" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: Parque residencial">
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label for="exampleFormControlTextarea1">Ingrese descripción (*):</label>
-                                                <textarea id="descripcion2" name="descripcion2" style="height:140px; resize:none;" class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-lg-6">
-                                                    <label for="exampleFormControlInput1">Fecha inicio(*):</label>
-                                                    <input type="date" name="fechainicio" class=" form-control" id="exampleFormControlInput1" name="trip-start">
-                                                </div>
-                                                <br>
-                                                <div class="col-lg-6">
-                                                    <label for="exampleFormControlInput1">Fecha término(*):</label>
-                                                    <input type="date" name="fechatermino" class="form-control" id="exampleFormControlInput1" name="trip-start">
-                                                </div>
-                                            </div>
-
-                                            <br>
-                                            <div class="form-group">
-                                                <label for="exampleFormControlInput1">Capital inicial(*):</label>
-                                                <input type="text" name="capital" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: 40000">
-                                            </div>
-                                            <?php
-                                            $sql = "SELECT idcomuna, nombrecomuna FROM comuna";
-                                            $resultados = $conexion->query($sql);
-                                            echo 'Comuna(*): <select style="margin-bottom:20px" name="comuna" id="tipo" class="form-control">';
-                                            echo '<option>Seleccione comuna... </option>';
-                                            while ($row = mysqli_fetch_array($resultados)) {
-                                                echo '<option value="' . $row["idcomuna"] . '">' . $row["nombrecomuna"] . '</option>';
-                                            }
-                                            echo '</select>'
-                                            ?>
-
-
-                                            <div class="form-group">
-                                                <label for="exampleFormControlFile1">Ingrese imagen de portada (*):</label>
-                                                <input name="fichero" class="fichero" type="file" class="form-control-file" id="exampleFormControlFile1">
-                                            </div>
-
-                                            <div class="form-group">
-                                                <input style="background-color:#002018; color:white;" type="submit" name="ingresar" class="usuario" value="Ingresar" style="margin-top:30 px">
-                                            </div>
-
-                                        </form>
-
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Mis contactos</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
 
                                         <?php
-                                        if (isset($_POST['ingresar'])) {
-                                            $nombreproyecto = $_POST['nombre'];
-                                            $descr = $_POST['descripcion2'];
-                                            $descr = trim($descr); //la funcion trim borra los espacios de al principio y al final
-                                            $descr = htmlspecialchars($descr);
-                                            $descr = stripslashes($descr);
-                                            $capitalinicial = $_POST['capital'];
-                                            $fechainicial = $_POST['fechainicio'];
-                                            $fechatermino = $_POST['fechatermino'];
-                                            $comuna = $_POST['comuna'];
-                                            $categoria = $_POST['categoria'];
-
-
-                                            if ($descr == '') {
-                                                $errores .= 'Ingrese todos los campos obligatorios';
-                                            } else {
-                                                if (is_uploaded_file($_FILES['fichero']['tmp_name'])) {
-                                                    //SE CREAN LAS VARIABLES PARA SUBIR A LA BASE DE DATOS
-                                                    $ruta = "img/";
-                                                    $ruta2 = "img/";
-                                                    $nombrefinal = trim($_FILES['fichero']['name']);
-                                                    $destino = "img/" . $nombrefinal;
-                                                    $upload = $ruta . $nombrefinal;
-                                                    $upload2 = $ruta2 . $nombrefinal;
-
-
-                                                    if (move_uploaded_file($_FILES['fichero']['tmp_name'], $upload2)) {
-
-                                                        $sql = "INSERT INTO proyecto VALUES (null,'" . $nombreproyecto . "',
-                            '" . $descr . "'," . $idusuario . ",'" . $destino . "',
-                            " . $comuna . ",0," . $capitalinicial . ",'" . $fechainicial . "','" . $fechatermino . "')";
-                                                        $result = $conexion->query($sql);
-                                                    }
-                                                } else {
-                                                    $sql = "INSERT INTO proyecto VALUES (null,'" . $nombreproyecto . "',
-                            '" . $descr . "'," . $idusuario . ",'img/sinfotoproyecto.jpg',
-                            " . $comuna . ",0," . $capitalinicial . ",'" . $fechainicial . "','" . $fechatermino . "')";
-                                                    $result = $conexion->query($sql);
-                                                }
-                                                $result3 = $conexion->query("SELECT MAX(idproyecto) from proyecto");
-                                                $idproyecto2 = mysqli_fetch_array($result3);
-                                                $idproyectocreado = $idproyecto2[0];
-
-
-                                                $consultausuario = $conexion->query("INSERT INTO participa VALUES (" . $idproyectocreado . "," . $idusuario . ",1)");
-                                                $consultausuario = $conexion->query("INSERT INTO secciones VALUES (null," . $idproyectocreado . ",'Principal', 'Seccion principal',0,1,1,0)");
-                                                $consultausuario = $conexion->query("INSERT INTO cargoproyecto VALUES (null,'Administrador'," . $idproyectocreado . ",'Tiene acceso total')");
-
-
-
-                                                $result3 = $conexion->query("SELECT MAX(idcargo) from cargoproyecto");
-                                                $idcargo = mysqli_fetch_array($result3);
-                                                $idcargocreado = $idcargo[0];
-
-                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",1,1)");
-                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",2,1)");
-                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",3,1)");
-                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",4,1)");
-
-                                                $fechahoy = date('Y-m-d');
-                                                $consultausuario = $conexion->query("INSERT INTO notificaciones values (null,'Inversión inicial',null," . $capitalinicial . ",'" . $fechahoy . "',null,
-		                                                                             " . $idproyectocreado . "," . $idusuario . ",1,2,'" . $fechahoy . "')");
-                                                $consultausuario = $conexion->query("INSERT INTO poseecargo VALUES (null," . $idusuario . "," . $idcargocreado . "," . $idproyectocreado . ")");
+                                        for ($i = 0; $i < $cantidadcontactos; $i++) {
 
                                         ?>
-                                                <script>
-                                                    window.location.replace("index.php");
+                                            <tr>
+                                                <input type="hidden" name="idusuario" value="<?php echo $idusuarios[$i] ?> ">
+
+                                                <td name="nombreseccion"><?php echo $nombrecontactos[$i] . " " . $apellidocontactos[$i]; ?></td>
+                                                <td>
+
+                                                    <input class="btn btn-danger mt-2" onclick="eliminar(<?php echo $idusuarios[$i] ?>,<?php echo $idusuario ?>)" type="button" value="Eliminar">
+
+                                                </td>
+                                                <script type="text/javascript">
+                                                    function eliminar(idreporte,idusuario) {
+                                                        if (confirm("¿Estás seguro de eliminar a tu contacto?")) {
+                                                            window.location.replace("eliminaramistad.php?idusuario1=" + idreporte + "&idusuario2=" + idusuario);
+                                                        } else {
+                                                            return
+                                                        };
+                                                    }
                                                 </script>
+
+                                            </tr>
+                                        <?php } ?>
+
+
+
                                         <?php
-                                            }
-                                            if (!$errores) {
-                                                $enviado = 'true';
-                                            }
+                                        if (isset($_POST['agregar'])) {
+                                            $idusuarioagregado = $_POST['idusuario'];
+                                            $consultausuario = $conexion->query("INSERT INTO solicitudamistad VALUES (null," . $idusuario . "," . $idusuarioagregado . ")");
+
+                                        ?>
+                                            <script>
+                                                window.location.replace("contactos.php");
+                                            </script>
+                                        <?php
+
                                         }
                                         ?>
-                                    </div>
-                                </div>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
 
 
-                    <!-- Content Row -->
-                    <div class="row">
 
-                        <!-- Earnings (Monthly) Card Example -->
-                        <?php
-                        if ($cantidadproyectos > 0) {
-                            for ($i = 0; $i < $cantidadproyectos; $i++) {
-                        ?>
-                                <div class="col-xl-3 col-md-6 mb-4">
-                                    <div class="card border-left-success shadow h-100 py-2">
-                                        <div class="card-body">
-                                            <div class="row no-gutters align-items-center">
-                                                <div class="col mr-2">
-                                                    <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $nombreproyecto[$i] ?></div>
-                                                </div>
-                                                <div class="col-auto">
-                                                    <img class="card-img-top" style="border-radius: 10px; box-shadow: 3rem;" src="<?php print_r($imagen[$i]); ?>" alt="Card image cap">
-                                                </div>
-                                                <a href="detalleproy.php?idproyecto=<?php print_r($idproyectos[$i]) ?>" class="btn btn-success mt-2">Gestionar</a>
 
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php
-                            }
-                        } else {
-                            ?>
-                            <h3>Aún no tienes proyectos</h3>
-                        <?php
-                        }
-                        ?>
-                    </div>
 
                 </div>
                 <!-- /.container-fluid -->
@@ -535,14 +416,16 @@ for ($i = 0; $i < $cantidadavances; $i++) {
 
     <!-- Custom scripts for all pages-->
     <script src="js/sb-admin-2.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 
     <!-- Page level plugins -->
-    <script src="vendor/chart.js/Chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
 
-    <!-- Page level custom scripts -->
-    <script src="js/demo/chart-area-demo.js"></script>
-    <script src="js/demo/chart-pie-demo.js"></script>
+
+    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="js/demo/datatables-demo.js"></script>
+
+
 
 </body>
 
