@@ -20,47 +20,16 @@ if ($inicio == "no") {
     header('Location: login.php');
 }
 //CONSULTA USUARIO
-$consultaavance = $conexion->query("SELECT nombreusuario,apellidos from usuario where idusuario=" . $idusuario);
+$consultaavance = $conexion->query("SELECT * from usuario where idusuario=" . $idusuario);
 while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $nombreusuario = $consultausuario["nombreusuario"];
     $apellidos = $consultausuario["apellidos"];
-}
-//CONSULTA PROYECTOS
-$consulta = "SELECT * from proyecto PR, usuario US, participa PA WHERE 
-            PR.idproyecto = PA.idproyecto AND 
-            US.idusuario = PA.idusuario AND
-            US.idusuario =" . $idusuario;
-$resultado = $conexion->query($consulta);
-$idproyectos = [];
-while ($consultaproyecto = mysqli_fetch_array($resultado)) {
-    $idproyectos[] = $consultaproyecto["idproyecto"];
-    $nombreproyecto[] = $consultaproyecto["nombreproyecto"];
-    $descripcionproyecto[] = $consultaproyecto["descripcionproyecto"];
-    $imagen[] = $consultaproyecto["rutaimagen"];
-}
-if ($idproyectos != null) {
-    $cantidadproyectos = sizeof($idproyectos);
-} else {
-    $cantidadproyectos = 0;
+    $correoelectronico = $consultausuario["correousuario"];
+    $acercademi = $consultausuario["acercademi"];
+    $fotoperfil = $consultausuario["fotoperfil"];
 }
 
-?>
-<script type="text/javascript">
-    let ultimoval = [];
-    let fechas = [];
-    let sumamts = [];
-    let nombresec = [];
-    let cantidadav = "<?php echo $cantidadavances ?>"
-</script>
-<?php
-for ($i = 0; $i < $cantidadavances; $i++) {
-?>
-    <script type="text/javascript">
-        fechas.push("<?php echo $fechareporte[$i]; ?>");
-        ultimoval.push("<?php echo $metrosavanzados[$i]; ?>");
-    </script>
-<?php
-}
+
 ?>
 
 <head>
@@ -101,7 +70,7 @@ for ($i = 0; $i < $cantidadavances; $i++) {
             <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item active">
+            <li class="nav-item ">
                 <a class="nav-link" href="index.php">
                     <i class="fas fa-fw fa-home"></i>
                     <span>Inicio</span></a>
@@ -116,8 +85,8 @@ for ($i = 0; $i < $cantidadavances; $i++) {
             </div>
 
             <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item">
-                <a class="nav-link" href="miperfil.php">
+            <li class="nav-item active">
+                <a class="nav-link" href="#">
                     <i class="fas fa-fw fa-user"></i>
                     <span>Mi perfil</span></a>
             </li>
@@ -297,187 +266,85 @@ for ($i = 0; $i < $cantidadavances; $i++) {
 
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Mis proyectos</h1>
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#infoavances2" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                            <i class="fas fa-download fa-sm text-white-50"></i> Crear proyecto</a>
-
+                        <h1 class="h3 mb-0 text-gray-800">Mi perfil</h1>
                     </div>
-                    <div class="modal fade" id="infoavances2" tabindex="-1" role="dialog" aria-labelledby="tituloavance" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class=modal-header>
-                                    <h5 id="tituloavance">Crear proyecto</h5>
-                                    <button type="button" class="fa fa-times" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div>
 
-                                        <form action="index.php" method="post" enctype="multipart/form-data">
-                                            <div class="form-group">
-                                                <label for="exampleFormControlInput1">Nombre proyecto(*):</label>
-                                                <input type="text" name="nombre" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: Parque residencial">
-                                            </div>
+                    <!-- Content Row -->
+                    <div class="row">
+                        <div class="col-xl-6 col-md-12 mb-2">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="no-gutters align-items-center">
+                                    <form action="miperfil.php" method="POST">
 
-                                            <div class="form-group">
-                                                <label for="exampleFormControlTextarea1">Ingrese descripción (*):</label>
-                                                <textarea id="descripcion2" name="descripcion2" style="height:140px; resize:none;" class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-lg-6">
-                                                    <label for="exampleFormControlInput1">Fecha inicio(*):</label>
-                                                    <input type="date" name="fechainicio" class=" form-control" id="exampleFormControlInput1" name="trip-start">
-                                                </div>
-                                                <br>
-                                                <div class="col-lg-6">
-                                                    <label for="exampleFormControlInput1">Fecha término(*):</label>
-                                                    <input type="date" name="fechatermino" class="form-control" id="exampleFormControlInput1" name="trip-start">
-                                                </div>
-                                            </div>
+                                        <div class="col mr-2">
+                                            <label for="">Nombres:</label>
+                                            <div id="nombreusuario" class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $nombreusuario ?></div>
+                                            <input hidden type="text" name="inputnombre" id="inputnombre" class="form-control" value="<?php echo $nombreusuario ?>" id="exampleFormControlInput1" >
 
-                                            <br>
-                                            <div class="form-group">
-                                                <label for="exampleFormControlInput1">Capital inicial(*):</label>
-                                                <input type="text" name="capital" class="form-control" id="exampleFormControlInput1" placeholder="Por ejemplo: 40000">
-                                            </div>
-                                            <?php
-                                            $sql = "SELECT idcomuna, nombrecomuna FROM comuna";
-                                            $resultados = $conexion->query($sql);
-                                            echo 'Comuna(*): <select style="margin-bottom:20px" name="comuna" id="tipo" class="form-control">';
-                                            echo '<option>Seleccione comuna... </option>';
-                                            while ($row = mysqli_fetch_array($resultados)) {
-                                                echo '<option value="' . $row["idcomuna"] . '">' . $row["nombrecomuna"] . '</option>';
-                                            }
-                                            echo '</select>'
-                                            ?>
+                                        </div>
+                                        <div class="col mr-2">
+                                            <label for="">Apellidos:</label>
+                                            <div id="apellidos" class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $apellidos ?></div>
+                                            <input hidden type="text" id="inputapellidos" name="inputapellidos" class="form-control" value="<?php echo $apellidos ?>" id="exampleFormControlInput1" >
 
+                                        </div>
+                                        <div class="col mr-2">
+                                            <label for="">Correo:</label>
+                                            <div id="correo" class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $correoelectronico ?></div>
+                                        </div>
+                                        <div class="col mr-2">
+                                            <label for="">Acerca de mí:</label>
+                                            <div id="acercademi" class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $acercademi ?></div>
+                                            <input hidden type="text" id="inputacerca" name="inputacerca" value="<?php echo $acercademi ?>" class="form-control" id="exampleFormControlInput1" >
 
-                                            <div class="form-group">
-                                                <label for="exampleFormControlFile1">Ingrese imagen de portada (*):</label>
-                                                <input name="fichero" class="fichero" type="file" class="form-control-file" id="exampleFormControlFile1">
-                                            </div>
+                                        </div>
+                                       
+                                        <a onclick="editar()" id="editar" style="color:white" class="btn btn-success mt-2">Editar</a>
+                                        <a onclick="editar()" hidden id="cancelar" style="color:white" class="btn btn-secondary mt-2">Cancelar</a>
+                                        <input style="margin-top:30px; color:white;" hidden id="guardarcambios" class="btn btn-success mt-2" type="submit" name="guardarcambios" value="Guardar cambios">
 
-                                            <div class="form-group">
-                                                <input style="background-color:#002018; color:white;" type="submit" name="ingresar" class="usuario" value="Ingresar" style="margin-top:30 px">
-                                            </div>
+                            </form>
 
-                                        </form>
-
-
-                                        <?php
-                                        if (isset($_POST['ingresar'])) {
-                                            $nombreproyecto = $_POST['nombre'];
-                                            $descr = $_POST['descripcion2'];
-                                            $descr = trim($descr); //la funcion trim borra los espacios de al principio y al final
-                                            $descr = htmlspecialchars($descr);
-                                            $descr = stripslashes($descr);
-                                            $capitalinicial = $_POST['capital'];
-                                            $fechainicial = $_POST['fechainicio'];
-                                            $fechatermino = $_POST['fechatermino'];
-                                            $comuna = $_POST['comuna'];
-                                            $categoria = $_POST['categoria'];
-
-
-                                            if ($descr == '') {
-                                                $errores .= 'Ingrese todos los campos obligatorios';
-                                            } else {
-                                                if (is_uploaded_file($_FILES['fichero']['tmp_name'])) {
-                                                    //SE CREAN LAS VARIABLES PARA SUBIR A LA BASE DE DATOS
-                                                    $ruta = "img/";
-                                                    $ruta2 = "img/";
-                                                    $nombrefinal = trim($_FILES['fichero']['name']);
-                                                    $destino = "img/" . $nombrefinal;
-                                                    $upload = $ruta . $nombrefinal;
-                                                    $upload2 = $ruta2 . $nombrefinal;
-
-
-                                                    if (move_uploaded_file($_FILES['fichero']['tmp_name'], $upload2)) {
-
-                                                        $sql = "INSERT INTO proyecto VALUES (null,'" . $nombreproyecto . "',
-                            '" . $descr . "'," . $idusuario . ",'" . $destino . "',
-                            " . $comuna . ",0," . $capitalinicial . ",'" . $fechainicial . "','" . $fechatermino . "')";
-                                                        $result = $conexion->query($sql);
-                                                    }
-                                                } else {
-                                                    $sql = "INSERT INTO proyecto VALUES (null,'" . $nombreproyecto . "',
-                            '" . $descr . "'," . $idusuario . ",'img/sinfotoproyecto.jpg',
-                            " . $comuna . ",0," . $capitalinicial . ",'" . $fechainicial . "','" . $fechatermino . "')";
-                                                    $result = $conexion->query($sql);
-                                                }
-                                                $result3 = $conexion->query("SELECT MAX(idproyecto) from proyecto");
-                                                $idproyecto2 = mysqli_fetch_array($result3);
-                                                $idproyectocreado = $idproyecto2[0];
-
-
-                                                $consultausuario = $conexion->query("INSERT INTO participa VALUES (" . $idproyectocreado . "," . $idusuario . ",1)");
-                                                $consultausuario = $conexion->query("INSERT INTO secciones VALUES (null," . $idproyectocreado . ",'Principal', 'Seccion principal',0,1,1,0)");
-                                                $consultausuario = $conexion->query("INSERT INTO cargoproyecto VALUES (null,'Administrador'," . $idproyectocreado . ",'Tiene acceso total')");
-
-
-
-                                                $result3 = $conexion->query("SELECT MAX(idcargo) from cargoproyecto");
-                                                $idcargo = mysqli_fetch_array($result3);
-                                                $idcargocreado = $idcargo[0];
-
-                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",1,1)");
-                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",2,1)");
-                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",3,1)");
-                                                $consultausuario = $conexion->query("INSERT INTO permisocargo VALUES (null," . $idcargocreado . "," . $idproyectocreado . ",4,1)");
-
-                                                $fechahoy = date('Y-m-d');
-                                                $consultausuario = $conexion->query("INSERT INTO notificaciones values (null,'Inversión inicial',null," . $capitalinicial . ",'" . $fechahoy . "',null,
-		                                                                             " . $idproyectocreado . "," . $idusuario . ",1,2,'" . $fechahoy . "')");
-                                                $consultausuario = $conexion->query("INSERT INTO poseecargo VALUES (null," . $idusuario . "," . $idcargocreado . "," . $idproyectocreado . ")");
-
-                                        ?>
-                                                <script>
-                                                    window.location.replace("index.php");
-                                                </script>
-                                        <?php
-                                            }
-                                            if (!$errores) {
-                                                $enviado = 'true';
-                                            }
-                                        }
-                                        ?>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        <script>
+                            function editar(){
+                                valor = document.getElementById("nombreusuario").hidden;
+                                valor = !valor;
+                                document.getElementById("nombreusuario").hidden = valor;
+                                document.getElementById("apellidos").hidden = valor;
+                                document.getElementById("acercademi").hidden = valor;
+                                document.getElementById("editar").hidden = valor;
 
+                                document.getElementById("cancelar").hidden = !valor;
+                                document.getElementById("guardarcambios").hidden = !valor;
 
-                    <!-- Content Row -->
-                    <div class="row">
-
-                        <!-- Earnings (Monthly) Card Example -->
-                        <?php
-                        if ($cantidadproyectos > 0) {
-                            for ($i = 0; $i < $cantidadproyectos; $i++) {
-                        ?>
-                                <div class="col-xl-3 col-md-6 mb-4">
-                                    <div class="card border-left-success shadow h-100 py-2">
-                                        <div class="card-body">
-                                            <div class="row no-gutters align-items-center">
-                                                <div class="col mr-2">
-                                                    <div class="h5 mb-0 font-weight-bold text-gray-800"><?php echo $nombreproyecto[$i] ?></div>
-                                                </div>
-                                                <div class="col-auto">
-                                                    <img class="card-img-top" style="border-radius: 10px; box-shadow: 3rem;" src="<?php print_r($imagen[$i]); ?>" alt="Card image cap">
-                                                </div>
-                                                <a href="detalleproy.php?idproyecto=<?php print_r($idproyectos[$i]) ?>" class="btn btn-success mt-2">Gestionar</a>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            <?php
+                                document.getElementById("inputnombre").hidden = !valor;
+                                document.getElementById("inputapellidos").hidden = !valor;
+                                document.getElementById("inputacerca").hidden = !valor;
                             }
-                        } else {
-                            ?>
-                            <h3>Aún no tienes proyectos</h3>
-                        <?php
-                        }
+                        </script>
+                        <?php 
+                            if (isset($_POST['guardarcambios'])) {
+                                $nombresinput = $_POST['inputnombre'];
+                                $apellidosinput = $_POST['inputapellidos'];
+                                $acercainput = $_POST['inputacerca'];
+                        
+                                $consultausuario = $conexion->query("UPDATE usuario SET nombreusuario='" . $nombresinput . "' where idusuario=" . $idusuario);
+                                $consultausuario = $conexion->query("UPDATE usuario SET apellidos='" . $apellidosinput . "' where idusuario=" . $idusuario);
+                                $consultausuario = $conexion->query("UPDATE usuario SET acercademi='" . $acercainput . "' where idusuario=" . $idusuario);
+
+                                ?>
+                                <script>
+                                                    window.location.replace("miperfil.php");
+                                                </script>
+                                <?php
+                            }
                         ?>
+
                     </div>
 
                 </div>

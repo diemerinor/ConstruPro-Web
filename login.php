@@ -55,7 +55,7 @@ $idusuario = null;
                                     </div>
                                     <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post" enctype="multipart/form-data">
                                         <div class="form-group">
-                                            <input name="usuario" class="form-control" id="exampleFormControlInput1" placeholder="Username">
+                                            <input name="usuario" type="email" class="form-control" id="exampleFormControlInput1" placeholder="Correo electrónico">
                                         </div>
 
                                         <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post" enctype="multipart/form-data">
@@ -80,7 +80,7 @@ $idusuario = null;
                                                 $errores .= 'Ingrese todos los datos';
                                             } else {
 
-                                                $consulta = "SELECT * from usuario WHERE nombreusuario='" . $usuario . "'";
+                                                $consulta = "SELECT * from usuario WHERE correousuario='" . $usuario . "'";
                                                 $resultado = $conexion->query($consulta);
                                                 while ($consultausuario = mysqli_fetch_array($resultado)) {
                                                     $clave2 = $consultausuario["password"];
@@ -100,10 +100,7 @@ $idusuario = null;
                                         } ?>
                                         <hr>
                                         <div class="text-center">
-                                            <a class="small" href="forgot-password.html">¿Olvidaste la contraseña?</a>
-                                        </div>
-                                        <div class="text-center">
-                                            <a class="small" href="register.html">Crea una cuenta</a>
+                                            <a class="small" href="crearcuenta.php">Crea una cuenta</a>
                                         </div>
                                 </div>
                             </div>

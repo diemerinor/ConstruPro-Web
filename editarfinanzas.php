@@ -161,9 +161,9 @@ if (empty($idproyecto2)) {
 
             <!-- Nav Item - Charts -->
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="miperfil.php">
                     <i class="fas fa-fw fa-user"></i>
-                    <span>Cuenta</span></a>
+                    <span>Mi perfil</span></a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="miscontactos.php">

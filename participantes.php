@@ -27,7 +27,7 @@ while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $nombreusuario = $consultausuario["nombreusuario"];
     $apellidos = $consultausuario["apellidos"];
 }
-$consultaavance = $conexion->query("SELECT * from usuario us, proyecto pr, participa pa, cargoproyecto cp where
+$consultaavance = $conexion->query("SELECT pr.idproyecto,cp.idcargo,pr.nombreproyecto,us.idusuario,cp.nombrecargo from usuario us, proyecto pr, participa pa, cargoproyecto cp where
     cp.idcargo = pa.idcargo and
     pa.idproyecto= pr.idproyecto and pa.idusuario = us.idusuario and
     pr.idproyecto =" . $idproyecto . " and
@@ -36,40 +36,59 @@ while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $idproyecto2 = $consultausuario["idproyecto"];
     $idcargousuario = $consultausuario["idcargo"];
     $nombreproyecto[0] = $consultausuario["nombreproyecto"];
+}
 
+// $consultaavance = $conexion->query("SELECT cp.nombrecargo, gp.nombregestion, pc.permiso from cargoproyecto cp, gestionproyecto gp, permisocargo pc where
+//     cp.idcargo = pc.idcargo and
+//     pc.idgestion = gp.idgestion and
+//     pc.idcargo=" . $idcargousuario);
+// while ($consultausuario = mysqli_fetch_array($consultaavance)) {
+//     
+//     $nombrecargo[] = $consultausuario["nombrecargo"];
+//     $nombregestion[] = $consultausuario["nombregestion"];
+//     //$idgestion[] = $consultausuario["idgestion"];
+//     $permiso[] = $consultausuario["permiso"];
+// }
+
+
+$consultaamistad = $conexion->query("SELECT * FROM  usuario us, amistad am where (am.idusuario1 =" . $idusuario . " or am.idusuario2=" . $idusuario . ") and (am.idusuario1 = us.idusuario or am.idusuario2=us.idusuario)");
+$participa = [];
+
+while ($consultausuario = mysqli_fetch_array($consultaamistad)) {
+    if ($consultausuario["idusuario"] != $idusuario) {
+        $idusuarios[] = $consultausuario["idusuario"];
+        $nombrecontacto[] = $consultausuario["nombreusuario"] . ' ' . $consultausuario["apellidos"];
+        $result5 = $conexion->query("SELECT pa.idusuario, pa.idcargo from proyecto PR, participa PA, usuario US where PR.idproyecto=PA.idproyecto and
+                                                PA.idusuario = US.idusuario and PA.idusuario=" . $consultausuario["idusuario"] . " and PR.idproyecto=" . $idproyecto);
+        while ($row3 = mysqli_fetch_array($result5)) {
+            $result[] = $row3;
+            $usuariospa[] = $row3["idusuario"];
+            $participa[] = $row3["idcargo"];
+        }
+    }
 }
-$consultaavance = $conexion->query("SELECT cp.nombrecargo, gp.nombregestion, pc.permiso from cargoproyecto cp, gestionproyecto gp, permisocargo pc where
-    cp.idcargo = pc.idcargo and
-    pc.idgestion = gp.idgestion and
-    pc.idcargo=".$idcargousuario);
-while ($consultausuario = mysqli_fetch_array($consultaavance)) {
-    $result[]=$consultausuario;
-    $nombrecargo[] = $consultausuario["nombrecargo"];
-    $nombregestion[]=$consultausuario["nombregestion"];
-    //$idgestion[] = $consultausuario["idgestion"];
-    $permiso[] = $consultausuario["permiso"];
-}
+$cantidadcontactos = sizeof($nombrecontacto);
 if (empty($idproyecto2)) {
     header('Location: index.php');
 }
 
 
-$consultamateriales = $conexion->query("SELECT * FROM proyecto pr, usuario us, poseecargo pc, cargoproyecto cp
+$consultamateriales = $conexion->query("SELECT * FROM proyecto pr, usuario us, participa pa, cargoproyecto cp
 where cp.idproyecto = pr.idproyecto and
-pc.idusuario = us.idusuario and
-cp.idcargo = pc.idcargo and
+pa.idusuario = us.idusuario and
+cp.idcargo = pa.idcargo and
 pr.idproyecto=" . $idproyecto);
 $nombreparticipante = [];
 while ($consultausuario = mysqli_fetch_array($consultamateriales)) {
+    $result[] = $consultausuario;
     $idusuarioparticipante[] = $consultausuario["idusuario"];
-    $idposeecargo[] = $consultausuario["idposee"];
     $nombreparticipante[] = $consultausuario["nombreusuario"] . ' ' . $consultausuario["apellidos"];
     $idcargo[] = $consultausuario["idcargo"];
     $nombrecargo[] = $consultausuario["nombrecargo"];
-
     $username2[] = $consultausuario["nombreusuario"];
 }
-$cantidadparticipantes= null;
+
+$cantidadparticipantes = null;
 if ($nombreparticipante != null) {
     $cantidadparticipantes = sizeof($nombreparticipante);
 }
@@ -176,9 +195,9 @@ if ($nombreparticipante != null) {
 
             <!-- Nav Item - Charts -->
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="miperfil.php">
                     <i class="fas fa-fw fa-user"></i>
-                    <span>Cuenta</span></a>
+                    <span>Mi perfil</span></a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="miscontactos.php">
@@ -376,26 +395,7 @@ if ($nombreparticipante != null) {
                                         <div class="card-header py-3">
                                             <h6 class="m-0 font-weight-bold text-primary">Contactos</h6>
                                         </div>
-                                        <?php
-                                        $consultaamistad = $conexion->query("SELECT * FROM  usuario us, amistad am where (am.idusuario1 =" . $idusuario . " or am.idusuario2=" . $idusuario . ") and (am.idusuario1 = us.idusuario or am.idusuario2=us.idusuario)");
-                                        $participa = [];
 
-                                        while ($consultausuario = mysqli_fetch_array($consultaamistad)) {
-                                            if ($consultausuario["idusuario"] != $idusuario) {
-                                                $idusuarios[] = $consultausuario["idusuario"];
-                                                $nombrecontacto[] = $consultausuario["nombreusuario"] . ' ' . $consultausuario["apellidos"];
-                                                $result5 = $conexion->query("SELECT pa.idusuario, pa.codigorol from proyecto PR, participa PA, usuario US where PR.idproyecto=PA.idproyecto and
-                                                PA.idusuario = US.idusuario and PA.idusuario=" . $consultausuario["idusuario"] . " and PR.idproyecto=" . $idproyecto);
-                                                while ($row3 = $result5->fetch_array()) {
-                                                    $result[] = $row3;
-                                                    $usuariospa[] = $row3["idusuario"];
-                                                    $participa[] = $row3["codigorol"];
-                                                }
-                                            }
-                                        }
-
-                                        $cantidadcontactos = sizeof($nombrecontacto);
-                                        ?>
                                         <div class="card-body">
                                             <div class="table-responsive">
                                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
@@ -467,17 +467,7 @@ if ($nombreparticipante != null) {
                         </div>
                     </div>
 
-                    <?php
-                    if (isset($_GET['ingresar'])) {
-                        $nombrebuscar = $_GET['nombre'];
 
-                        $result3 = $conexion->query("SELECT * from usuario where nombreusuario like '%$nombrebuscar'");
-
-                        while ($row = $result3->fetch_array()) {
-                            echo $row['apellidos'];
-                        }
-                    }
-                    ?>
 
                     <div class="container-fluid">
 
@@ -543,67 +533,68 @@ if ($nombreparticipante != null) {
                                         </script>
                                         <tbody>
                                             <?php
-                                            if ($cantidadparticipantes!=null){
+                                            if ($cantidadparticipantes != null) {
+                                                for ($i = 0; $i < $cantidadparticipantes; $i++) {
+                                            ?>
+                                                    <form action="participantes.php?idproyecto=<?php echo $idproyecto ?>" method="post" enctype="multipart/form-data">
 
-                                                for ($i = 0; $i < $cantidadparticipantes; $i++) { ?>
-                                                <form action="participantes.php?idproyecto=<?php echo $idproyecto ?>" method="post" enctype="multipart/form-data">
+                                                        <tr>
+                                                            <td><?php echo $nombreparticipante[$i] ?></td>
+                                                            <td>
+                                                                <label id="label<?php echo $idusuarioparticipante[$i] ?>" for="">
+                                                                    <?php echo $nombrecargo[$i] ?>
 
-                                                    <tr>
-                                                        <td><?php echo $nombreparticipante[$i] ?></td>
-                                                        <td>
-                                                            <label id="label<?php echo $idusuarioparticipante[$i] ?>" for="">
-                                                                <?php echo $nombrecargo[$i] ?>
-
-                                                            </label>
-                                                            <?php
-                                                            $sql = "SELECT * FROM cargoproyecto cp, proyecto pr where
+                                                                </label>
+                                                                <?php
+                                                                $sql = "SELECT * FROM cargoproyecto cp, proyecto pr where
                                                         cp.idproyecto = pr.idproyecto and
                                                         pr.idproyecto=" . $idproyecto;
-                                                            $resultados = $conexion->query($sql);
-                                                            echo ' <div id="cargos' . $idusuarioparticipante[$i] . '" hidden class="form-group"> Cargo nuevo(*): <select style="margin-bottom:30px; " name="seccion" id="selectcargo' . $idusuarioparticipante[$i] . '" class="form-control">';
-                                                            echo '<option>Seleccione un cargo... </option>';
-                                                            while ($row = mysqli_fetch_array($resultados)) {
-                                                                if ($row["idcargo"] == $idcargo[$i]) {
-                                                                    echo '<option selected="true" value="' . $row["idcargo"] . '">' . $row["nombrecargo"] . '</option>';
-                                                                } else if ($row["idcargo"] !== $idcargo[$i]) {
-                                                                    echo '<option value="' . $row["idcargo"] . '">' . $row["nombrecargo"] . '</option>';
+                                                                $resultados = $conexion->query($sql);
+                                                                echo ' <div id="cargos' . $idusuarioparticipante[$i] . '" hidden class="form-group"> Cargo nuevo(*): <select style="margin-bottom:30px; " name="seccion" id="selectcargo' . $idusuarioparticipante[$i] . '" class="form-control">';
+                                                                echo '<option>Seleccione un cargo... </option>';
+                                                                while ($row = mysqli_fetch_array($resultados)) {
+                                                                    if ($row["idcargo"] == $idcargo[$i]) {
+                                                                        echo '<option selected="true" value="' . $row["idcargo"] . '">' . $row["nombrecargo"] . '</option>';
+                                                                    } else if ($row["idcargo"] !== $idcargo[$i]) {
+                                                                        echo '<option value="' . $row["idcargo"] . '">' . $row["nombrecargo"] . '</option>';
+                                                                    }
                                                                 }
-                                                            }
-                                                            echo '</select> </div>';
-                                                            ?>
-                                                            <?php
-                                                            if ($nombrecargo[$i] !== 'Administrador') {
-                                                            ?>
-                                                                <button id="guardar<?php echo $idusuarioparticipante[$i] ?>" onclick="clickEditar(<?php echo $idusuarioparticipante[$i] ?>)" class="btn btn-success mt-2" type="button"> <i class="fas fa-edit"></i></button>
-                                                            <?php } ?>
+                                                                echo '</select> </div>';
+                                                                ?>
+                                                                <?php
+                                                                if ($nombrecargo[$i] !== 'Administrador') {
+                                                                ?>
+                                                                    <button id="guardar<?php echo $idusuarioparticipante[$i] ?>" onclick="clickEditar(<?php echo $idusuarioparticipante[$i] ?>)" class="btn btn-success mt-2" type="button"> <i class="fas fa-edit"></i></button>
+                                                                <?php } ?>
 
 
-                                                        <td>
-                                                            <?php
-                                                            if ($nombrecargo[$i] !== 'Administrador') {
-                                                            ?>
-                                                                <button disabled id="editar<?php echo $idusuarioparticipante[$i] ?>" onclick="guardar(<?php echo $idusuarioparticipante[$i] ?>,<?php echo $idposeecargo[$i] ?>)" class="btn btn-success mt-2" type="button"> Guardar cambios</i></button>
-                                                                <button id="eliminar<?php echo $idusuarioparticipante[$i] ?>" onclick="eliminar(<?php echo $idusuarioparticipante[$i] ?>,<?php echo $idproyecto ?>)" class="btn btn-danger mt-2" type="button"> <i class="fas fa-trash"></i></button>
-                                                                <button hidden id="cancelar<?php echo $idusuarioparticipante[$i] ?>" onclick="cancelar(<?php echo $idusuarioparticipante[$i] ?>)" class="btn btn-danger mt-2" type="button"> Cancelar</button>
+                                                            <td>
+                                                                <?php
+                                                                if ($nombrecargo[$i] !== 'Administrador') {
+                                                                ?>
+                                                                    <button disabled id="editar<?php echo $idusuarioparticipante[$i] ?>" onclick="guardar(<?php echo $idusuarioparticipante[$i] ?>,<?php echo $idposeecargo[$i] ?>)" class="btn btn-success mt-2" type="button"> Guardar cambios</i></button>
+                                                                    <button id="eliminar<?php echo $idusuarioparticipante[$i] ?>" onclick="eliminar(<?php echo $idusuarioparticipante[$i] ?>,<?php echo $idproyecto ?>)" class="btn btn-danger mt-2" type="button"> <i class="fas fa-trash"></i></button>
+                                                                    <button hidden id="cancelar<?php echo $idusuarioparticipante[$i] ?>" onclick="cancelar(<?php echo $idusuarioparticipante[$i] ?>)" class="btn btn-danger mt-2" type="button"> Cancelar</button>
 
 
-                                                            <?php } else {
-                                                                echo '<label>No es posible realizar acciones a este usuario </option>';
-                                                            } ?>
-                                                        </td>
-                                                    </tr>
-                                                </form>
-                                                <script type="text/javascript">
-                                                    function eliminar(idreporte, idproyecto) {
-                                                        if (confirm("¿Estás seguro de eliminar este participante?")) {
-                                                            window.location.replace("eliminarparticipantes.php?idusuario=" + idreporte + "&idproyecto=" + idproyecto);
-                                                        } else {
-                                                            return
-                                                        };
-                                                    }
-                                                </script>
+                                                                <?php } else {
+                                                                    echo '<label>No es posible realizar acciones a este usuario </option>';
+                                                                } ?>
+                                                            </td>
+                                                        </tr>
+                                                    </form>
+                                                    <script type="text/javascript">
+                                                        function eliminar(idreporte, idproyecto) {
+                                                            if (confirm("¿Estás seguro de eliminar este participante?")) {
+                                                                window.location.replace("eliminarparticipantes.php?idusuario=" + idreporte + "&idproyecto=" + idproyecto);
+                                                            } else {
+                                                                return
+                                                            };
+                                                        }
+                                                    </script>
 
-                                            <?php }}
+                                                <?php }
+                                            }
 
                                             if (isset($_POST['editaravance'])) {
                                                 $seccion = $_POST['seccion'];
@@ -623,7 +614,7 @@ if ($nombreparticipante != null) {
 
                                                     $consultausuario = $conexion->query("UPDATE reporteavance SET descripcionavance='" . $descr . "' where idreporteavance=" . $idreporte);
                                                 }
-                                            ?>
+                                                ?>
                                                 <script>
                                                     window.location.replace("charts.php?idproyecto=<?php echo $idproyecto ?>");
                                                 </script>

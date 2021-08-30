@@ -25,7 +25,15 @@ if (empty($idproyecto)) {
 $consultaavance = $conexion->query("SELECT * from proyecto where idproyecto=" . $idproyecto);
 while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $nombreproyecto = $consultausuario["nombreproyecto"];
+    $descripcionproyecto = $consultausuario["descripcionproyecto"];
+    $metrostotales = $consultausuario["metrostotales"];
+    $fechainicialproy = date("Y-m-d", strtotime($consultausuario["fechainicial"]));
+    $fechaterminoproy = date("Y-m-d", strtotime($consultausuario["fechatermino"]));
 }
+$descripcionproyecto = trim($descripcionproyecto); //la funcion trim borra los espacios de al principio y al final
+$descripcionproyecto = htmlspecialchars($descripcionproyecto);
+$descripcionproyecto = stripslashes($descripcionproyecto);
+
 
 //CONSULTA USUARIO
 $consultaavance = $conexion->query("SELECT nombreusuario,apellidos from usuario where idusuario=" . $idusuario);
@@ -45,11 +53,11 @@ while ($consultausuario = mysqli_fetch_array($consultaavance)) {
 $consultaavance = $conexion->query("SELECT cp.nombrecargo, gp.nombregestion, pc.permiso from cargoproyecto cp, gestionproyecto gp, permisocargo pc where
     cp.idcargo = pc.idcargo and
     pc.idgestion = gp.idgestion and
-    pc.idcargo=".$idcargo);
+    pc.idcargo=" . $idcargo);
 while ($consultausuario = mysqli_fetch_array($consultaavance)) {
-    $result[]=$consultausuario;
+    $result[] = $consultausuario;
     $nombrecargo[] = $consultausuario["nombrecargo"];
-    $nombregestion[]=$consultausuario["nombregestion"];
+    $nombregestion[] = $consultausuario["nombregestion"];
     //$idgestion[] = $consultausuario["idgestion"];
     $permiso[] = $consultausuario["permiso"];
 }
@@ -217,49 +225,49 @@ if ($gasto == null) {
 
             <!-- Nav Item - Pages Collapse Menu -->
             <?php
-                if($permiso[0]==1){
-                
-            ?>
-            <li class="nav-item">
-                <a class="nav-link" href="charts.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-chart-area"></i>
-                    <span>Avances</span></a>
-            </li><?php
-                }
-                if($permiso[1]==1){
+            if ($permiso[0] == 1) {
 
             ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="charts.php?idproyecto=<?php print_r($idproyecto) ?>">
+                        <i class="fas fa-fw fa-chart-area"></i>
+                        <span>Avances</span></a>
+                </li><?php
+                    }
+                    if ($permiso[1] == 1) {
 
-            <!-- Nav Item - Utilities Collapse Menu -->
-            <li class="nav-item">
-                <a class="nav-link" href="finanzas.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-dollar-sign"></i>
-                    <span>Finanzas</span></a>
-            </li>
+                        ?>
+
+                <!-- Nav Item - Utilities Collapse Menu -->
+                <li class="nav-item">
+                    <a class="nav-link" href="finanzas.php?idproyecto=<?php print_r($idproyecto) ?>">
+                        <i class="fas fa-fw fa-dollar-sign"></i>
+                        <span>Finanzas</span></a>
+                </li>
             <?php
-                }
-                if($permiso[3]==1){
+                    }
+                    if ($permiso[3] == 1) {
 
             ?>
 
-            <li class="nav-item">
-                <a class="nav-link" href="materiales.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-wrench"></i>
-                    <span>Materiales</span></a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="materiales.php?idproyecto=<?php print_r($idproyecto) ?>">
+                        <i class="fas fa-fw fa-wrench"></i>
+                        <span>Materiales</span></a>
+                </li>
             <?php
-                }
-                if($permiso[2]==1){
+                    }
+                    if ($permiso[2] == 1) {
 
             ?>
 
-            <li class="nav-item">
-                <a class="nav-link" href="participantes.php?idproyecto=<?php print_r($idproyecto) ?>">
-                    <i class="fas fa-fw fa-users"></i>
-                    <span>Participantes</span></a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="participantes.php?idproyecto=<?php print_r($idproyecto) ?>">
+                        <i class="fas fa-fw fa-users"></i>
+                        <span>Participantes</span></a>
+                </li>
             <?php
-                }
+                    }
 
             ?>
 
@@ -287,9 +295,9 @@ if ($gasto == null) {
 
             <!-- Nav Item - Charts -->
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="miperfil.php">
                     <i class="fas fa-fw fa-user"></i>
-                    <span>Cuenta</span></a>
+                    <span>Mi perfil</span></a>
             </li>
 
             <li class="nav-item">
@@ -342,7 +350,7 @@ if ($gasto == null) {
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
 
-                    <?php
+                        <?php
                         $cantidadsolicitudes = 0;
                         $idusuario1 = [];
                         $nombresolicitante = [];
@@ -455,7 +463,78 @@ if ($gasto == null) {
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Tablero</h1>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#infoavances3" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                            <i class="fas fa-download fa-sm text-white-50"></i> Editar proyecto</a>
                     </div>
+                    <div class="modal fade" id="infoavances3" tabindex="-1" role="dialog" aria-labelledby="tituloavance" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class=modal-header>
+                                    <h5 id="tituloavance">Editar proyecto</h5>
+                                    <button type="button" class="fa fa-times" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div>
+
+                                        <form action="detalleproy.php?idproyecto=<?php echo $idproyecto?>" method="post" enctype="multipart/form-data">
+                                            <div class="form-group">
+                                                <label for="exampleFormControlInput1">Nombre proyecto(*):</label>
+                                                <input type="text" name="nombreeditar" class="form-control" id="exampleFormControlInput1" value="<?php echo $nombreproyecto; ?>">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="exampleFormControlTextarea1">Ingrese descripción (*):</label>
+                                                <textarea id="descripcion2" name="descripcioneditar" style="height:140px; resize:none;" class="form-control" id="exampleFormControlTextarea1" rows="3"><?php echo $descripcionproyecto; ?></textarea>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-6">
+                                                    <label for="exampleFormControlInput1">Fecha inicio(*):</label>
+                                                    <input type="date" value="<?php echo $fechainicialproy; ?>" name="fechainicioeditar" class="form-control" id="exampleFormControlInput1" name="trip-start">
+                                                </div>
+                                                <br>
+                                                <div class="col-lg-6">
+                                                    <label for="exampleFormControlInput1">Fecha término(*):</label>
+                                                    <input type="date" value="<?php echo $fechaterminoproy; ?>" name="fechaterminoeditar" class="form-control" id="exampleFormControlInput1" name="trip-start">
+                                                </div>
+                                            </div>
+                                            <br>
+                                            <div class="form-group">
+                                                <input style="background-color:#002018; color:white;" type="submit" name="editar" class="usuario" value="Editar" style="margin-top:30 px">
+                                            </div>
+
+                                        </form>
+
+
+                                        <?php
+                                        if (isset($_POST['editar'])) {
+                                            $nombreproyecto = $_POST['nombreeditar'];
+                                            $descr = $_POST['descripcioneditar'];
+                                            $descr = trim($descr); //la funcion trim borra los espacios de al principio y al final
+                                            $descr = htmlspecialchars($descr);
+                                            $descr = stripslashes($descr);
+                                            $fechainicial = $_POST['fechainicioeditar'];
+                                            $fechatermino = $_POST['fechaterminoeditar'];
+                                            $consultausuario = $conexion->query("UPDATE proyecto SET nombreproyecto='" . $nombreproyecto . "' where idproyecto=" . $idproyecto);
+                                            $consultausuario = $conexion->query("UPDATE proyecto SET descripcionproyecto='" . $descr . "' where idproyecto=" . $idproyecto);
+                                            $consultausuario = $conexion->query("UPDATE proyecto SET fechainicial='" . $fechainicial . "' where idproyecto=" . $idproyecto);
+                                            $consultausuario = $conexion->query("UPDATE proyecto SET fechatermino='" . $fechatermino . "' where idproyecto=" . $idproyecto);
+
+
+                                           
+                                        ?>
+                                                <script>
+                                                    window.location.replace("detalleproy.php?idproyecto=<?php echo $idproyecto?>");
+                                                </script>
+                                        <?php
+                                            }
+                                        
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <!-- Content Row -->
                     <div class="row">
@@ -552,7 +631,7 @@ if ($gasto == null) {
                                 <!-- Card Header - Dropdown -->
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Últimos avances</h6>
-                                  
+
                                 </div>
                                 <!-- Card Body -->
                                 <div class="card-body">

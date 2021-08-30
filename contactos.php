@@ -117,11 +117,10 @@ for ($i = 0; $i < $cantidadavances; $i++) {
 
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="miperfil.php">
                     <i class="fas fa-fw fa-user"></i>
                     <span>Mi perfil</span></a>
             </li>
-
             <li class="nav-item">
                 <a class="nav-link" href="miscontactos.php">
                     <i class="fas fa-users"></i>

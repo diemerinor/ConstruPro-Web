@@ -42,16 +42,27 @@ while ($consultausuario = mysqli_fetch_array($consultaavance)) {
     $nombreusuario = $consultausuario["nombreusuario"];
     $apellidos = $consultausuario["apellidos"];
 }
-$consultaavance = $conexion->query("SELECT * from usuario us, proyecto pr, participa pa where
+$consultaavance = $conexion->query("SELECT * from usuario us, proyecto pr, participa pa, cargoproyecto cp where
+    cp.idcargo = pa.idcargo and
     pa.idproyecto= pr.idproyecto and pa.idusuario = us.idusuario and
     pr.idproyecto =" . $idproyecto . " and
     us.idusuario=" . $idusuario);
 while ($consultausuario = mysqli_fetch_array($consultaavance)) {
-    $nombreproyecto = $consultausuario["nombreproyecto"];
     $idproyecto2 = $consultausuario["idproyecto"];
-    $rol = $consultausuario["codigorol"];
+    $idcargo = $consultausuario["idcargo"];
 }
 
+$consultaavance = $conexion->query("SELECT cp.nombrecargo, gp.nombregestion, pc.permiso from cargoproyecto cp, gestionproyecto gp, permisocargo pc where
+    cp.idcargo = pc.idcargo and
+    pc.idgestion = gp.idgestion and
+    pc.idcargo=".$idcargo);
+while ($consultausuario = mysqli_fetch_array($consultaavance)) {
+    $result[]=$consultausuario;
+    $nombrecargo[] = $consultausuario["nombrecargo"];
+    $nombregestion[]=$consultausuario["nombregestion"];
+    //$idgestion[] = $consultausuario["idgestion"];
+    $permiso[] = $consultausuario["permiso"];
+}
 $consultareporte = $conexion->query("SELECT * from reporteavance where
     idreporteavance=" . $idreporte);
 
@@ -155,30 +166,52 @@ for ($i = 0; $i < $cantidadavances; $i++) {
                 Gestión
             </div>
 
-            <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item ">
+            <?php
+                if($permiso[0]==1){
+                
+            ?>
+            <li class="nav-item">
                 <a class="nav-link" href="charts.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Avances</span></a>
-            </li>
+            </li><?php
+                }
+                if($permiso[1]==1){
+
+            ?>
 
             <!-- Nav Item - Utilities Collapse Menu -->
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link" href="finanzas.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-dollar-sign"></i>
                     <span>Finanzas</span></a>
             </li>
+            <?php
+                }
+                if($permiso[3]==1){
+
+            ?>
 
             <li class="nav-item">
                 <a class="nav-link" href="materiales.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-wrench"></i>
                     <span>Materiales</span></a>
             </li>
+            <?php
+                }
+                if($permiso[2]==1){
+
+            ?>
+
             <li class="nav-item">
                 <a class="nav-link" href="participantes.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-users"></i>
                     <span>Participantes</span></a>
             </li>
+            <?php
+                }
+
+            ?>
             <li class="nav-item">
                 <a class="nav-link" href="archivos.php?idproyecto=<?php print_r($idproyecto) ?>">
                     <i class="fas fa-fw fa-file"></i>
@@ -203,9 +236,9 @@ for ($i = 0; $i < $cantidadavances; $i++) {
 
             <!-- Nav Item - Charts -->
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="miperfil.php">
                     <i class="fas fa-fw fa-user"></i>
-                    <span>Cuenta</span></a>
+                    <span>Mi perfil</span></a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="miscontactos.php">
